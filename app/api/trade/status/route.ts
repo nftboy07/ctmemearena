@@ -1,14 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 
+function rpcUrl() {
+  if (process.env.ALCHEMY_API_KEY) return `https://solana-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
+  return process.env.SOLANA_RPC_URL ?? "https://api.mainnet-beta.solana.com";
+}
+
 export async function GET(request: NextRequest) {
-  if (!process.env.GMGN_API_KEY) return NextResponse.json({ error: "GMGN_API_KEY is not configured" }, { status: 503 });
   const hash = request.nextUrl.searchParams.get("hash");
-  const lastValidHeight = request.nextUrl.searchParams.get("last_valid_height");
-  if (!hash || !lastValidHeight) return NextResponse.json({ error: "hash and last_valid_height are required" }, { status: 400 });
-  const url = new URL("https://gmgn.ai/defi/router/v1/sol/tx/get_transaction_status");
-  url.searchParams.set("hash", hash);
-  url.searchParams.set("last_valid_height", lastValidHeight);
-  const response = await fetch(url, { headers: { "x-route-key": process.env.GMGN_API_KEY }, cache: "no-store" });
-  const data = await response.json();
-  return NextResponse.json(data, { status: response.status });
+  if (!hash) return NextResponse.json({ error: "hash is required" }, { status: 400 });
+  try {
+    const response = await fetch(rpcUrl(), {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getSignatureStatuses", params: [[hash], { searchTransactionHistory: true }] }),
+      cache: "no-store",
+    });
+    const data = await response.json();
+    if (!response.ok || data.error) return NextResponse.json({ error: data.error?.message ?? "status lookup failed" }, { status: 502 });
+    const status = data.result?.value?.[0];
+    return NextResponse.json({ hash, confirmed: Boolean(status), confirmationStatus: status?.confirmationStatus ?? null, slot: status?.slot ?? null, err: status?.err ?? null });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "status lookup failed" }, { status: 502 });
+  }
 }
