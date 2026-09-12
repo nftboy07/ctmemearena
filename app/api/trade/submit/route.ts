@@ -1,19 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 
+function rpcUrl() {
+  if (process.env.ALCHEMY_API_KEY) return `https://solana-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
+  return process.env.SOLANA_RPC_URL ?? "https://api.mainnet-beta.solana.com";
+}
+
 export async function POST(request: NextRequest) {
-  if (!process.env.GMGN_API_KEY) return NextResponse.json({ error: "GMGN_API_KEY is not configured" }, { status: 503 });
+  if (process.env.LIVE_TRADING_ENABLED !== "true") return NextResponse.json({ error: "Live trading is disabled" }, { status: 403 });
   try {
-    const body = await request.json() as { signedTx?: string; antiMev?: boolean };
+    const body = await request.json() as { signedTx?: string };
     if (!body.signedTx) return NextResponse.json({ error: "signedTx is required" }, { status: 400 });
-    const response = await fetch("https://gmgn.ai/defi/router/v1/sol/tx/submit_signed_transaction", {
+    const response = await fetch(rpcUrl(), {
       method: "POST",
-      headers: { "content-type": "application/json", "x-route-key": process.env.GMGN_API_KEY },
-      body: JSON.stringify({ chain: "sol", signedTx: body.signedTx, isAntiMev: Boolean(body.antiMev) }),
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "sendTransaction", params: [body.signedTx, { encoding: "base64", skipPreflight: false, preflightCommitment: "confirmed", maxRetries: 3 }] }),
       cache: "no-store",
     });
     const data = await response.json();
-    if (!response.ok) return NextResponse.json({ error: "GMGN submission failed", details: data }, { status: response.status });
-    return NextResponse.json(data);
+    if (!response.ok || data.error) return NextResponse.json({ error: data.error?.message ?? "transaction submission failed", details: data.error }, { status: 502 });
+    return NextResponse.json({ hash: data.result });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "submission failed" }, { status: 500 });
   }
