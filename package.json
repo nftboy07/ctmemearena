@@ -8,7 +8,6 @@
     "@privy-io/react-auth":"^3.42.0",
     "@solana/web3.js":"^1.98.4",
     "ioredis":"^5.4.1",
-    "jose":"^6.1.0",
     "lucide-react":"^0.468.0",
     "next":"15.5.4",
     "pg":"^8.13.1",
