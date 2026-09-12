@@ -6,4 +6,8 @@ CREATE INDEX IF NOT EXISTS player_stats_sniper ON player_stats(sniper_score DESC
 CREATE INDEX IF NOT EXISTS player_stats_best_trade ON player_stats(best_trade DESC);
 CREATE INDEX IF NOT EXISTS arena_events_type_time ON arena_events(event_type, created_at DESC);
 CREATE INDEX IF NOT EXISTS player_achievements_time ON player_achievements(unlocked_at DESC);
-ALTER TABLE trades ADD CONSTRAINT trades_status_valid CHECK (status IN ('ROUTED','SUBMITTED','CONFIRMED','FAILED','CANCELLED'));
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='trades_status_valid') THEN
+    ALTER TABLE trades ADD CONSTRAINT trades_status_valid CHECK (status IN ('ROUTED','SUBMITTED','CONFIRMED','FAILED','CANCELLED'));
+  END IF;
+END $$;
