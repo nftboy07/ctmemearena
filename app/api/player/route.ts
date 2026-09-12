@@ -1,0 +1,20 @@
+import { NextRequest, NextResponse } from "next/server";
+import { dbEnabled, query } from "@/lib/db";
+import { currentWallet } from "@/lib/auth";
+import { demoPlayers } from "@/app/api/players/route";
+export const runtime="nodejs";
+export async function GET(r:NextRequest){
+ const wallet=r.nextUrl.searchParams.get("wallet"); if(!wallet)return NextResponse.json({error:"wallet required"},{status:400});
+ const demo=demoPlayers().find(p=>p.wallet===wallet);
+ if(demo)return NextResponse.json({profile:demo,trades:demoTrades(wallet),holdings:demoHoldings(wallet),badges:demo.badges,following:false,source:"demo"});
+ if(!dbEnabled())return NextResponse.json({error:"Player not found"},{status:404});
+ const u=(await query<any>(`SELECT u.wallet,u.display_name,u.twitter_username,u.avatar_url,u.home_chain,u.bio,u.level,u.season_xp,s.realized_pnl,s.unrealized_pnl,s.volume_usd,s.wins,s.losses,s.best_trade,s.fomo_score,s.diamond_score,s.sniper_score,s.trades_count FROM users u JOIN player_stats s ON s.wallet=u.wallet WHERE u.wallet=$1`,[wallet])).rows[0];
+ if(!u)return NextResponse.json({error:"Player not found"},{status:404});
+ const [t,h,a]=await Promise.all([query<any>(`SELECT id,token_id,side,quote_raw,price,status,tx_hash,created_at FROM trades WHERE wallet=$1 ORDER BY created_at DESC LIMIT 50`,[wallet]),query<any>(`SELECT symbol,usd_value,pnl_usd,avg_entry,current_price FROM player_holdings WHERE wallet=$1 AND amount>0 ORDER BY usd_value DESC LIMIT 20`,[wallet]),query<any>(`SELECT achievement_key FROM player_achievements WHERE wallet=$1`,[wallet])]);
+ const me=await currentWallet(); const following=!!(me&&(await query(`SELECT 1 FROM player_follows WHERE follower_wallet=$1 AND followed_wallet=$2`,[me,wallet])).rowCount);
+ return NextResponse.json({profile:{wallet:u.wallet,displayName:u.display_name||"Anonymous",handle:u.twitter_username?`@${u.twitter_username}`:"@onchain",avatar:u.avatar_url,chain:u.home_chain,bio:u.bio,level:u.level,xp:Number(u.season_xp),pnl:Number(u.realized_pnl),unrealized:Number(u.unrealized_pnl),volume:Number(u.volume_usd),wins:u.wins,losses:u.losses,bestTrade:Number(u.best_trade),fomo:Number(u.fomo_score),diamond:Number(u.diamond_score),sniper:Number(u.sniper_score),trades:u.trades_count,badges:a.rows.map((x:any)=>x.achievement_key)},trades:t.rows,holdings:h.rows,following,source:"database"});
+}
+export async function POST(r:NextRequest){const target=String((await r.json()).wallet||"");const me=await currentWallet();if(!me)return NextResponse.json({error:"Authentication required"},{status:401});if(!target||target===me)return NextResponse.json({error:"Invalid target"},{status:400});if(dbEnabled())await query(`INSERT INTO player_follows(follower_wallet,followed_wallet) VALUES($1,$2) ON CONFLICT DO NOTHING`,[me,target]);return NextResponse.json({following:true});}
+export async function DELETE(r:NextRequest){const target=String((await r.json()).wallet||"");const me=await currentWallet();if(!me)return NextResponse.json({error:"Authentication required"},{status:401});if(dbEnabled())await query(`DELETE FROM player_follows WHERE follower_wallet=$1 AND followed_wallet=$2`,[me,target]);return NextResponse.json({following:false});}
+function demoTrades(w:string){const data:any={"demo:dumbcrayoneater":[["GOAT","BUY",42000,.031,482931],["BONK","SELL",180000,.000028,317221],["WIF","SELL",120000,1.02,184092],["POPCAT","SELL",68000,.39,92410]],"demo:salem":[["WIF","SELL",240000,.91,401220],["BONK","SELL",210000,.000021,283120],["GOAT","SELL",84000,.052,180442]],"demo:nate":[["POPCAT","SELL",190000,.28,533901],["GOAT","SELL",74000,.041,312220],["WIF","SELL",99000,.87,221130]]};return (data[w]||[]).map((x:any[],i:number)=>({id:`demo-${i}`,symbol:x[0],side:x[1],usd:x[2],price:x[3],pnl:x[4],status:"CONFIRMED",txHash:`demo${i}`,time:Date.now()-i*86400000}));}
+function demoHoldings(w:string){if(w!=="demo:dumbcrayoneater")return [];return [{symbol:"GOAT",value:2329600,pnl:1765400,entry:.031,price:.128},{symbol:"WIF",value:84940,pnl:21700,entry:1.02,price:1.37}];}
