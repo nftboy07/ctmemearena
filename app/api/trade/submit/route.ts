@@ -1,25 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-
-function rpcUrl() {
-  if (process.env.ALCHEMY_API_KEY) return `https://solana-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
-  return process.env.SOLANA_RPC_URL ?? "https://api.mainnet-beta.solana.com";
-}
-
-export async function POST(request: NextRequest) {
-  if (process.env.LIVE_TRADING_ENABLED !== "true") return NextResponse.json({ error: "Live trading is disabled" }, { status: 403 });
-  try {
-    const body = await request.json() as { signedTx?: string };
-    if (!body.signedTx) return NextResponse.json({ error: "signedTx is required" }, { status: 400 });
-    const response = await fetch(rpcUrl(), {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "sendTransaction", params: [body.signedTx, { encoding: "base64", skipPreflight: false, preflightCommitment: "confirmed", maxRetries: 3 }] }),
-      cache: "no-store",
-    });
-    const data = await response.json();
-    if (!response.ok || data.error) return NextResponse.json({ error: data.error?.message ?? "transaction submission failed", details: data.error }, { status: 502 });
-    return NextResponse.json({ hash: data.result });
-  } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "submission failed" }, { status: 500 });
-  }
-}
+import { NextRequest,NextResponse } from "next/server";
+import { VersionedTransaction } from "@solana/web3.js";
+import { currentWallet } from "@/lib/auth";
+import { dbEnabled,query } from "@/lib/db";
+import { rateLimit } from "@/lib/rate-limit";
+function rpcUrl(){if(process.env.ALCHEMY_API_KEY)return `https://solana-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;return process.env.SOLANA_RPC_URL??"https://api.mainnet-beta.solana.com";}
+export async function POST(request:NextRequest){if(process.env.LIVE_TRADING_ENABLED!=="true")return NextResponse.json({error:"Live trading is disabled"},{status:403});const wallet=await currentWallet();if(!wallet)return NextResponse.json({error:"Privy authentication with a Solana wallet is required"},{status:401});const rl=rateLimit(`submit:${wallet}`,10,60000);if(!rl.ok)return NextResponse.json({error:"Too many transaction submissions",retryAfter:rl.retryAfter},{status:429});try{const body=await request.json() as {signedTx?:string;tradeId?:string};if(!body.signedTx)return NextResponse.json({error:"signedTx is required"},{status:400});let tx:VersionedTransaction;try{tx=VersionedTransaction.deserialize(Buffer.from(body.signedTx,"base64"));}catch{return NextResponse.json({error:"Invalid Solana transaction"},{status:400});}const payer=tx.message.staticAccountKeys[0]?.toBase58();if(payer!==wallet)return NextResponse.json({error:"Transaction fee payer does not match authenticated wallet"},{status:403});if(dbEnabled()&&body.tradeId){const owned=await query<{id:string}>(`SELECT id FROM trades WHERE id=$1 AND wallet=$2 LIMIT 1`,[body.tradeId,wallet]);if(!owned.rowCount)return NextResponse.json({error:"Trade record not found"},{status:404});}
+ const response=await fetch(rpcUrl(),{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"sendTransaction",params:[body.signedTx,{encoding:"base64",skipPreflight:false,preflightCommitment:"confirmed",maxRetries:3}]}),cache:"no-store"});const data=await response.json();if(!response.ok||data.error)return NextResponse.json({error:data.error?.message??"transaction submission failed",details:data.error},{status:502});const hash=data.result as string;if(dbEnabled()&&body.tradeId){await query(`UPDATE trades SET status='SUBMITTED',tx_hash=$1,updated_at=NOW() WHERE id=$2 AND wallet=$3`,[hash,body.tradeId,wallet]);await query(`INSERT INTO trade_events(trade_id,wallet,event_type,payload) VALUES($1,$2,'SUBMITTED',$3)`,[body.tradeId,wallet,JSON.stringify({txHash:hash})]);}return NextResponse.json({hash,status:"SUBMITTED"});}catch(error){return NextResponse.json({error:error instanceof Error?error.message:"submission failed"},{status:500});}}
