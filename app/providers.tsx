@@ -11,8 +11,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       config={{
         loginMethods: ["google", "twitter", "email", "wallet"],
         appearance: { theme: "dark", accentColor: "#7c3aed", logo: "/favicon.ico" },
-        embeddedWallets: { ethereum: { createOnLogin: "off" }, solana: { createOnLogin: "users-without-wallets" } },
-        mfa: { noPromptOnMfaRequired: false },
+        embeddedWallets: {
+          ethereum: { createOnLogin: "off" },
+          solana: { createOnLogin: "users-without-wallets" },
+        },
       }}
     >
       {children}
