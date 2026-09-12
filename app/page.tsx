@@ -1,5 +1,5 @@
-import Arena from "@/components/Arena";
+import CTWorld from "@/components/CTWorld";
 
 export default function Home() {
-  return <Arena />;
+  return <CTWorld />;
 }
