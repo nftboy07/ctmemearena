@@ -1,15 +1,26 @@
 # CT Meme Arena
 
-CT Meme Arena is a Crypto Twitter-native meme-coin arena with live DEX market data, CT signal ingestion, wallet awareness, competitive paper trading, and an optional real Solana execution rail.
+CT Meme Arena is a Crypto Twitter-native on-chain social game. Players use their X/Google/Email identity, connect or receive a Solana wallet through Privy, enter blockchain-themed districts, discover profitable traders, inspect their holdings and trades, follow players, collect achievements, and compete on seasonal leaderboards.
 
-## Live stack
+## The game
+
+- **Blockchain districts** — Solana City, Base Block, Ethereum, BNB Boulevard and the all-chain Metaverse.
+- **Fame Board** — Profit, FOMO, Diamond Hands, Snipers and Best Trade leaderboards.
+- **Trader profiles** — X-style identity, avatar, verified wallet, PnL, unrealized PnL, win/loss record, best trade, holdings, trade history and achievements.
+- **Social graph** — follow/watch traders and build a personal list of players to beat.
+- **Season progression** — XP, levels, quests and achievement storage are backed by PostgreSQL.
+- **Live market** — DEX Screener prices refresh every 10 seconds and feed the Trading Pit.
+- **Realtime foundation** — Redis pub/sub and SSE are available for arena events.
+- **Privy** — Google, X/Twitter, email and wallet login with embedded Solana wallets.
+
+## Data and trading stack
 
 - **DEX Screener** — live Solana pair discovery, price, liquidity, volume and price-change data.
 - **X API v2** — recent CT posts for token/ticker searches when `X_BEARER_TOKEN` is configured.
 - **Alchemy Solana RPC** — wallet balances and transaction submission when `ALCHEMY_API_KEY` is configured.
-- **GMGN Trade API** — server-side Solana route generation when an approved `GMGN_API_KEY` is configured.
-- **Phantom-compatible wallet signing** — the browser wallet signs unsigned transactions; private keys never enter the server.
-- **Paper engine** — remains available for testing and competitive gameplay.
+- **GMGN Trade API** — guarded Solana route generation when an approved `GMGN_API_KEY` is configured.
+- **PostgreSQL** — users, seasons, trades, player stats, holdings, follows, achievements, quests and audit records.
+- **Redis** — realtime arena event fan-out.
 
 ## Run locally
 
@@ -21,60 +32,51 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-## Enable live market data
+## Privy production setup
 
-No key is required for the basic DEX Screener market adapter. The app polls live market data every 10 seconds and falls back to the bundled demo dataset if a provider is unavailable.
+Configure a production Privy app with Google, X/Twitter, email and wallet login. Set `NEXT_PUBLIC_PRIVY_APP_ID`, `PRIVY_APP_ID` and `PRIVY_APP_SECRET`, configure the production domain/cookies in Privy, and apply the SQL in `db/schema.sql` plus migrations in `db/migrations/`.
 
-## Enable live CT signals
-
-Set:
+## Enable live data
 
 ```env
 X_BEARER_TOKEN=...
-```
-
-The app uses X API v2 recent search for token/ticker queries. Keep the token server-side.
-
-## Enable wallet/on-chain data
-
-Preferred:
-
-```env
 ALCHEMY_API_KEY=...
-```
-
-or provide a compatible Solana RPC URL:
-
-```env
 SOLANA_RPC_URL=https://...
 ```
 
+The app has safe demo fallbacks when optional providers are unavailable.
+
 ## Enable real trading
 
-GMGN Trade API access is gated by GMGN approval. After receiving an API key:
+GMGN access is gated by GMGN approval. After receiving an API key:
 
 ```env
 GMGN_API_KEY=...
 LIVE_TRADING_ENABLED=true
 ```
 
-The server requests an unsigned route transaction from GMGN. The connected browser wallet signs it. The server then submits the signed transaction through the configured Solana RPC. The server never receives a seed phrase or private key.
+The server authenticates the Privy Solana wallet, checks the requested `fromAddress`, applies rate limiting and idempotency, requests an unsigned route from GMGN, and records the trade. The browser signs the transaction; the server never receives a seed phrase or private key. Signed submission also verifies that the transaction fee payer matches the authenticated wallet.
 
 **Start with a dedicated low-balance test wallet. Verify the token mint, route, slippage, amount, priority fee and wallet prompt before signing.**
 
 ## API
 
+- `GET /api/players` — seasonal social leaderboard by category and chain.
+- `GET /api/player?wallet=<address>` — player profile, trades, holdings, badges and follow state.
+- `POST /api/player` / `DELETE /api/player` — follow/unfollow a player.
 - `GET /api/market` — live market radar with fallback.
-- `GET /api/market?q=BONK` — live Solana pair search plus optional CT signals.
 - `GET /api/wallet?owner=<address>` — SOL and SPL token balances.
-- `POST /api/trade/route` — guarded GMGN route generation.
-- `POST /api/trade/submit` — guarded signed-transaction submission.
+- `POST /api/trade/route` — authenticated, rate-limited GMGN route generation.
+- `POST /api/trade/submit` — authenticated signed-transaction submission.
 - `GET /api/trade/status?hash=<signature>` — Solana transaction status.
+- `GET /api/leaderboard` — persistent XP leaderboard.
+- `GET /api/quests` — authenticated seasonal quests.
+- `GET /api/realtime` — Redis-backed arena event stream.
 - `GET /api/health` — provider and live-trading readiness.
 
-## Safety and production hardening
+## Production checklist
 
-The live rail is deliberately server-keyed and wallet-signed. Before public launch, add authentication, database-backed users/seasons/trades, Redis/pub-sub for high-fanout events, server-side idempotency keys, persistent audit logs, abuse controls, token allow/deny lists, RPC failover, provider circuit breakers, monitoring, alerting, and an independent security review.
+Keep `LIVE_TRADING_ENABLED=false` until Privy, PostgreSQL, Redis, Solana RPC and GMGN are configured and a low-balance end-to-end test has passed. Before handling meaningful funds, add RPC/provider failover, distributed rate limiting, background wallet-data ingestion, transaction confirmation workers, monitoring/alerting and an independent security review.
 
 ## License / data providers
 
