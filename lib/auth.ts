@@ -1,13 +1,11 @@
 import { cookies, headers } from "next/headers";
 import { createHash } from "node:crypto";
-import { PrivyClient, verifyAccessToken } from "@privy-io/node";
-import { createRemoteJWKSet } from "jose";
+import { PrivyClient } from "@privy-io/node";
 import { dbEnabled, query } from "@/lib/db";
 
 const PRIVY_COOKIE = "privy-token";
 const ARENA_COOKIE = "ctarena_session";
 const hash = (value: string) => createHash("sha256").update(value).digest("hex");
-let jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
 
 function appId() {
   const id = process.env.NEXT_PUBLIC_PRIVY_APP_ID || process.env.PRIVY_APP_ID;
@@ -27,8 +25,7 @@ async function tokenFromRequest() {
 export async function currentPrivyUser() {
   const token = await tokenFromRequest();
   if (!token) return null;
-  jwks ??= createRemoteJWKSet(new URL(`https://auth.privy.io/api/v1/apps/${appId()}/jwks.json`));
-  try { return await verifyAccessToken({ access_token: token, app_id: appId(), verification_key: jwks }); } catch { return null; }
+  try { return await client().utils().auth().verifyAuthToken(token); } catch { return null; }
 }
 export async function currentUser() {
   const claims = await currentPrivyUser();
@@ -54,8 +51,4 @@ export async function currentWallet() {
 }
 export async function requireWallet() { const wallet = await currentWallet(); if (!wallet) throw new Error("Authenticated Privy Solana wallet required"); return wallet; }
 export async function requirePrivyUser() { const user = await currentUser(); if (!user) throw new Error("Privy authentication required"); return user; }
-export async function logout() {
-  const jar = await cookies();
-  jar.set(PRIVY_COOKIE, "", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 0 });
-  jar.set(ARENA_COOKIE, "", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 0 });
-}
+export async function logout() { const jar = await cookies(); jar.set(PRIVY_COOKIE, "", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 0 }); jar.set(ARENA_COOKIE, "", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 0 }); }
