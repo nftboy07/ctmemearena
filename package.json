@@ -1,19 +1,35 @@
 {
   "name": "ct-meme-arena",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "private": true,
-  "scripts": {"dev":"next dev","build":"next build","start":"next start","typecheck":"tsc --noEmit","db:migrate":"node scripts/migrate.mjs"},
-  "dependencies": {
-    "@privy-io/node":"^0.34.0",
-    "@privy-io/react-auth":"^3.42.0",
-    "@solana/web3.js":"^1.98.4",
-    "ioredis":"^5.4.1",
-    "lucide-react":"^0.468.0",
-    "next":"15.5.7",
-    "pg":"^8.13.1",
-    "react":"19.1.0",
-    "react-dom":"19.1.0",
-    "tweetnacl":"^1.0.3"
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "node scripts/migrate.mjs"
   },
-  "devDependencies": {"@types/node":"^22.10.0","@types/pg":"^8.11.10","@types/react":"^19.0.0","@types/react-dom":"^19.0.0","typescript":"^5.7.2"}
+  "dependencies": {
+    "@privy-io/node": "^0.34.0",
+    "@privy-io/react-auth": "^3.42.0",
+    "@solana/kit": "^8.3.0",
+    "@solana-program/memo": "^0.13.1",
+    "@solana-program/system": "^0.14.1",
+    "@solana-program/token": "^0.16.1",
+    "@solana/web3.js": "^1.98.4",
+    "ioredis": "^5.4.1",
+    "lucide-react": "^0.468.0",
+    "next": "15.5.24",
+    "pg": "^8.13.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/pg": "^8.11.10",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.2"
+  }
 }
