@@ -1,6 +1,6 @@
 {
   "name": "ct-meme-arena",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -12,6 +12,7 @@
   "dependencies": {
     "@privy-io/node": "^0.34.0",
     "@privy-io/react-auth": "^3.42.0",
+    "@farcaster/mini-app-solana": "latest",
     "@solana/kit": "5.5.1",
     "@solana-program/memo": "0.10.0",
     "@solana-program/system": "0.10.0",
@@ -19,8 +20,8 @@
     "@solana/web3.js": "^1.98.4",
     "ioredis": "^5.4.1",
     "lucide-react": "^0.468.0",
-    "next": "15.5.24",
     "pg": "^8.13.1",
+    "next": "15.5.24",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "tweetnacl": "^1.0.3"
