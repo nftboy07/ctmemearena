@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbEnabled, query } from "@/lib/db";
 import { currentWallet } from "@/lib/auth";
-import { demoPlayers } from "@/app/api/players/route";
+import { demoPlayers } from "@/lib/demo-players";
 export const runtime="nodejs";
 export async function GET(r:NextRequest){
  const wallet=r.nextUrl.searchParams.get("wallet"); if(!wallet)return NextResponse.json({error:"wallet required"},{status:400});
