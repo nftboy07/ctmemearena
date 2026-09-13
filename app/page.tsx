@@ -1,5 +1,5 @@
-import CTWorldResponsive from "@/components/CTWorldResponsive";
+import ArenaChrome from "@/components/ArenaChrome";
 
 export default function Home() {
-  return <CTWorldResponsive />;
+  return <ArenaChrome />;
 }
