@@ -1,5 +1,5 @@
-import CTWorld from "@/components/CTWorld";
+import CTWorldResponsive from "@/components/CTWorldResponsive";
 
 export default function Home() {
-  return <CTWorld />;
+  return <CTWorldResponsive />;
 }
