@@ -285,6 +285,10 @@ export default function CTWorldCanvas({
       bgImageRef.current = bg;
       isImageLoadedRef.current = true;
     };
+    if (bg.complete && bg.naturalWidth > 0) {
+      bgImageRef.current = bg;
+      isImageLoadedRef.current = true;
+    }
 
     // 2. Photorealistic Human Sprites
     const spriteUrls: { [key: string]: string } = {
@@ -312,6 +316,9 @@ export default function CTWorldCanvas({
       sp.onload = () => {
         spritesRef.current[key] = sp;
       };
+      if (sp.complete && sp.naturalWidth > 0) {
+        spritesRef.current[key] = sp;
+      }
     });
 
     spawnCollectibles();
@@ -630,9 +637,10 @@ export default function CTWorldCanvas({
       const screenW = canvas.width / dpr;
       const screenH = canvas.height / dpr;
 
-      const aspect = 16 / 9;
-      const worldW = Math.max(screenW, screenH * aspect);
-      const worldH = Math.max(screenH, worldW / aspect);
+      // Fully cover viewport on any mobile or desktop screen
+      const scaleFactor = Math.max(screenW / 1376, screenH / 768, 1.0);
+      const worldW = 1376 * scaleFactor;
+      const worldH = 768 * scaleFactor;
 
       // --- 1. PLAYER INPUT & LOCOMOTION ---
       const p = playerRef.current;
@@ -778,8 +786,9 @@ export default function CTWorldCanvas({
       ctx.clearRect(0, 0, screenW, screenH);
 
       // --- 4. RENDER CLEAN PROMENADE BACKGROUND ---
-      if (isImageLoadedRef.current && bgImageRef.current) {
-        ctx.drawImage(bgImageRef.current, -cam.x, -cam.y, worldW, worldH);
+      const bgImg = bgImageRef.current;
+      if (bgImg && (isImageLoadedRef.current || bgImg.complete) && bgImg.naturalWidth > 0) {
+        ctx.drawImage(bgImg, -cam.x, -cam.y, worldW, worldH);
       } else {
         const grad = ctx.createLinearGradient(0, 0, 0, screenH);
         grad.addColorStop(0, "#080c16");
