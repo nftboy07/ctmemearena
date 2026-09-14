@@ -28,8 +28,7 @@ export interface WanderingTrader {
   handle: string;
   role: string;
   roleColor: string;
-  jacketColor: string;
-  skinTone: string;
+  spriteKey: string;
   pnl: number;
   x: number;
   y: number;
@@ -79,78 +78,57 @@ export interface CTWorldCanvasProps {
   onResetJump?: () => void;
 }
 
-// Initial Wandering Crypto Twitter Traders
+// Initial Wandering Photorealistic Crypto Twitter Streetwear Traders
 const INITIAL_TRADERS: WanderingTrader[] = [
   {
     id: "trader_satoshi",
     handle: "@SatoshiNakamoto",
     role: "FOUNDER",
     roleColor: "#F59E0B",
-    jacketColor: "#1C1917",
-    skinTone: "#F3D2B3",
+    spriteKey: "satoshi",
     pnl: 14280.5,
-    x: 0.62,
-    y: 0.68,
-    targetX: 0.66,
-    targetY: 0.72,
+    x: 0.65,
+    y: 0.64,
+    targetX: 0.70,
+    targetY: 0.68,
     speed: 0.00035,
     facing: Math.PI / 2,
     walkCycle: 0,
     isMoving: true,
-    bubbleText: "gm CT ☕",
+    bubbleText: "gm CT \u2615",
     bubbleTimer: 280,
   },
   {
-    id: "trader_alpha",
-    handle: "@AlphaChad",
-    role: "RESEARCHER",
-    roleColor: "#38BDF8",
-    jacketColor: "#0F2942",
-    skinTone: "#E8C39E",
-    pnl: 2840.0,
-    x: 0.35,
-    y: 0.58,
-    targetX: 0.38,
-    targetY: 0.54,
+    id: "trader_quneri",
+    handle: "@BasedQuneri",
+    role: "NFT COLLECTOR",
+    roleColor: "#A855F7",
+    spriteKey: "quneri",
+    pnl: 3200.0,
+    x: 0.32,
+    y: 0.66,
+    targetX: 0.28,
+    targetY: 0.62,
     speed: 0.00045,
-    facing: 0,
-    walkCycle: 1.5,
+    facing: -Math.PI / 4,
+    walkCycle: 0.4,
     isMoving: true,
-    bubbleTimer: 350,
+    bubbleTimer: 450,
   },
   {
     id: "trader_degen",
     handle: "@DegenAlpha",
     role: "SNIPER",
     roleColor: "#F43F5E",
-    jacketColor: "#3B0D23",
-    skinTone: "#ECC8A8",
+    spriteKey: "degen",
     pnl: 890.2,
-    x: 0.28,
-    y: 0.64,
-    targetX: 0.32,
-    targetY: 0.70,
-    speed: 0.00065,
+    x: 0.26,
+    y: 0.62,
+    targetX: 0.30,
+    targetY: 0.68,
+    speed: 0.0006,
     facing: -Math.PI * 0.75,
     walkCycle: 2.2,
-    isMoving: true,
-    bubbleTimer: 450,
-  },
-  {
-    id: "trader_solhunter",
-    handle: "@SolHunter",
-    role: "EARLY",
-    roleColor: "#06B6D4",
-    jacketColor: "#0E3A45",
-    skinTone: "#DEB887",
-    pnl: 5410.8,
-    x: 0.20,
-    y: 0.54,
-    targetX: 0.18,
-    targetY: 0.50,
-    speed: 0.0005,
-    facing: -Math.PI / 2,
-    walkCycle: 0.8,
     isMoving: true,
     bubbleTimer: 520,
   },
@@ -159,90 +137,85 @@ const INITIAL_TRADERS: WanderingTrader[] = [
     handle: "@WhaleMode",
     role: "WHALE",
     roleColor: "#0284C7",
-    jacketColor: "#0B253A",
-    skinTone: "#F5D0A9",
+    spriteKey: "whale",
     pnl: 45200.0,
-    x: 0.50,
-    y: 0.52,
-    targetX: 0.46,
-    targetY: 0.56,
+    x: 0.46,
+    y: 0.54,
+    targetX: 0.42,
+    targetY: 0.58,
     speed: 0.0003,
     facing: Math.PI / 2,
     walkCycle: 1.0,
     isMoving: true,
-    bubbleTimer: 400,
+    bubbleTimer: 380,
+  },
+  {
+    id: "trader_alpha",
+    handle: "@AlphaChad",
+    role: "RESEARCHER",
+    roleColor: "#38BDF8",
+    spriteKey: "alpha",
+    pnl: 2840.0,
+    x: 0.38,
+    y: 0.55,
+    targetX: 0.42,
+    targetY: 0.52,
+    speed: 0.00045,
+    facing: 0,
+    walkCycle: 1.5,
+    isMoving: true,
+    bubbleTimer: 600,
+  },
+  {
+    id: "trader_solhunter",
+    handle: "@SolHunter",
+    role: "EARLY",
+    roleColor: "#06B6D4",
+    spriteKey: "solhunter",
+    pnl: 5410.8,
+    x: 0.20,
+    y: 0.55,
+    targetX: 0.18,
+    targetY: 0.52,
+    speed: 0.0005,
+    facing: -Math.PI / 2,
+    walkCycle: 0.8,
+    isMoving: true,
+    bubbleTimer: 480,
   },
   {
     id: "trader_diamond",
     handle: "@DiamondMax",
     role: "DIAMOND HANDS",
     roleColor: "#00F0FF",
-    jacketColor: "#0A2838",
-    skinTone: "#E0B790",
+    spriteKey: "alpha",
     pnl: 1940.4,
-    x: 0.74,
-    y: 0.64,
-    targetX: 0.80,
-    targetY: 0.68,
+    x: 0.76,
+    y: 0.62,
+    targetX: 0.82,
+    targetY: 0.66,
     speed: 0.0004,
     facing: 0,
     walkCycle: 3.0,
     isMoving: true,
-    bubbleTimer: 300,
-  },
-  {
-    id: "trader_quneri",
-    handle: "@BasedQuneri",
-    role: "NFT COLLECTOR",
-    roleColor: "#A855F7",
-    jacketColor: "#2E1065",
-    skinTone: "#D7A87A",
-    pnl: 3200.0,
-    x: 0.66,
-    y: 0.54,
-    targetX: 0.62,
-    targetY: 0.52,
-    speed: 0.00045,
-    facing: -Math.PI / 4,
-    walkCycle: 0.4,
-    isMoving: true,
-    bubbleTimer: 600,
-  },
-  {
-    id: "trader_mint",
-    handle: "@MintQueen",
-    role: "NFT COLLECTOR",
-    roleColor: "#EC4899",
-    jacketColor: "#3B0728",
-    skinTone: "#F7D5B8",
-    pnl: 4120.0,
-    x: 0.78,
-    y: 0.58,
-    targetX: 0.74,
-    targetY: 0.62,
-    speed: 0.0005,
-    facing: Math.PI,
-    walkCycle: 1.8,
-    isMoving: true,
-    bubbleTimer: 480,
+    bubbleTimer: 550,
   },
   {
     id: "trader_cobie",
     handle: "@Cobie",
     role: "PODCASTER",
     roleColor: "#10B981",
-    jacketColor: "#064E3B",
-    skinTone: "#F2CEAA",
+    spriteKey: "cobie",
     pnl: 33400.0,
-    x: 0.84,
-    y: 0.53,
-    targetX: 0.88,
-    targetY: 0.56,
+    x: 0.82,
+    y: 0.54,
+    targetX: 0.86,
+    targetY: 0.57,
     speed: 0.00035,
     facing: 0,
     walkCycle: 2.1,
     isMoving: true,
-    bubbleTimer: 550,
+    bubbleTimer: 650,
   }
 ];
 
@@ -260,10 +233,10 @@ export default function CTWorldCanvas({
   // Player State
   const playerRef = useRef({
     x: 0.50,
-    y: 0.66,
+    y: 0.68,
     vx: 0,
     vy: 0,
-    facing: -Math.PI / 2, // facing north/up initially
+    facing: -Math.PI / 2, // Facing North/Up (viewed from behind with glowing CT jacket)
     walkCycle: 0,
     isMoving: false,
     speed: 0.00065,
@@ -276,6 +249,9 @@ export default function CTWorldCanvas({
   const particlesRef = useRef<Particle[]>([]);
   const bgImageRef = useRef<HTMLImageElement | null>(null);
   const isImageLoadedRef = useRef(false);
+
+  // Preloaded Photorealistic Sprites Cache
+  const spritesRef = useRef<{ [key: string]: HTMLImageElement }>({});
 
   // Keyboard State
   const keysRef = useRef<{ [key: string]: boolean }>({});
@@ -300,23 +276,53 @@ export default function CTWorldCanvas({
     collectiblesRef.current = items;
   }, []);
 
-  // Preload Background Image
+  // Preload Background Image & Photorealistic Sprites
   useEffect(() => {
-    const img = new Image();
-    img.src = "/arena_promenade.jpg";
-    img.onload = () => {
-      bgImageRef.current = img;
+    // 1. Background Promenade
+    const bg = new Image();
+    bg.src = "/arena_promenade.jpg";
+    bg.onload = () => {
+      bgImageRef.current = bg;
       isImageLoadedRef.current = true;
     };
+
+    // 2. Photorealistic Human Sprites
+    const spriteUrls: { [key: string]: string } = {
+      player_back: "/sprites/player_back.png",
+      player_front: "/sprites/player_front.png",
+      satoshi_back: "/sprites/trader_satoshi_back.png",
+      satoshi_front: "/sprites/trader_satoshi_front.png",
+      quneri_back: "/sprites/trader_quneri_back.png",
+      quneri_front: "/sprites/trader_quneri_front.png",
+      degen_back: "/sprites/trader_degen_back.png",
+      degen_front: "/sprites/trader_degen_front.png",
+      whale_back: "/sprites/trader_whale_back.png",
+      whale_front: "/sprites/trader_whale_front.png",
+      alpha_back: "/sprites/trader_alpha_back.png",
+      alpha_front: "/sprites/trader_alpha_front.png",
+      solhunter_back: "/sprites/trader_solhunter_back.png",
+      solhunter_front: "/sprites/trader_solhunter_front.png",
+      cobie_back: "/sprites/trader_cobie_back.png",
+      cobie_front: "/sprites/trader_cobie_front.png",
+    };
+
+    Object.entries(spriteUrls).forEach(([key, url]) => {
+      const sp = new Image();
+      sp.src = url;
+      sp.onload = () => {
+        spritesRef.current[key] = sp;
+      };
+    });
+
     spawnCollectibles();
   }, [spawnCollectibles]);
 
-  // Handle jump request from UI
+  // Fast Travel Jump Handler
   useEffect(() => {
     if (!jumpDistrictId) return;
     if (jumpDistrictId === "bull_square" || jumpDistrictId === "solana") {
       playerRef.current.x = 0.50;
-      playerRef.current.y = 0.66;
+      playerRef.current.y = 0.68;
     } else if (jumpDistrictId === "fomo") {
       playerRef.current.x = 0.24;
       playerRef.current.y = 0.58;
@@ -324,10 +330,10 @@ export default function CTWorldCanvas({
       playerRef.current.x = 0.76;
       playerRef.current.y = 0.60;
     } else if (jumpDistrictId === "sniper") {
-      playerRef.current.x = 0.32;
-      playerRef.current.y = 0.70;
+      playerRef.current.x = 0.30;
+      playerRef.current.y = 0.68;
     } else if (jumpDistrictId === "whale") {
-      playerRef.current.x = 0.54;
+      playerRef.current.x = 0.52;
       playerRef.current.y = 0.52;
     }
     sounds.playDistrictSwoosh();
@@ -338,7 +344,7 @@ export default function CTWorldCanvas({
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       keysRef.current[e.code] = true;
-      targetPosRef.current = null; // Keyboard overrides click-to-move
+      targetPosRef.current = null;
     };
     const onKeyUp = (e: KeyboardEvent) => {
       keysRef.current[e.code] = false;
@@ -352,8 +358,8 @@ export default function CTWorldCanvas({
     };
   }, []);
 
-  // Chunky Little-Kerala Stylized Humanoid Character Drawing
-  const drawArticulatedHuman = useCallback(
+  // Photorealistic Human Character Drawing Routine
+  const drawPhotorealisticHuman = useCallback(
     (
       ctx: CanvasRenderingContext2D,
       cx: number,
@@ -365,72 +371,72 @@ export default function CTWorldCanvas({
       opts: {
         isPlayer?: boolean;
         isTurbo?: boolean;
+        spriteBaseKey: string; // 'player', 'satoshi', 'quneri', etc.
         roleColor?: string;
-        jacketColor?: string;
-        skinTone?: string;
         handle?: string;
         role?: string;
         bubbleText?: string;
         showInspectPrompt?: boolean;
       }
     ) => {
-      // Scale: depth * 1.0 for realistic promenade proportion
-      const scale = depth * 1.0;
-      const cycle = isMoving ? walkCycle : 0;
-
-      // 4-way / 8-way facing direction analysis
+      // 8-way / 4-way facing direction analysis
       const normAngle = ((facing % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-      const isFacingAway = normAngle > Math.PI * 1.15 && normAngle < Math.PI * 1.85;
-      const isFacingRight = normAngle <= Math.PI * 0.35 || normAngle >= Math.PI * 1.65;
-      const isFacingLeft = normAngle >= Math.PI * 0.65 && normAngle <= Math.PI * 1.35;
+      const isFacingCamera = normAngle > Math.PI * 0.15 && normAngle < Math.PI * 0.85;
+      const isFacingLeft = normAngle >= Math.PI * 0.55 && normAngle <= Math.PI * 1.45;
+      const isFacingRight = normAngle <= Math.PI * 0.45 || normAngle >= Math.PI * 1.55;
 
-      // Locomotion equations
-      const strideAmp = isMoving ? (opts.isTurbo ? 18 : 13) * scale : 0;
-      const stride1 = Math.sin(cycle) * strideAmp;
-      const lift1 = isMoving ? Math.max(0, -Math.cos(cycle)) * 10 * scale : 0;
-      const lift2 = isMoving ? Math.max(0, Math.cos(cycle)) * 10 * scale : 0;
-      const bodyBob = isMoving ? Math.abs(Math.sin(cycle)) * 3.5 * scale : Math.sin(Date.now() * 0.003) * 1.2 * scale;
-      const shoulderTilt = isMoving ? Math.sin(cycle) * 0.08 : 0;
+      // Select sprite key (front vs back)
+      const spriteKey = isFacingCamera
+        ? `${opts.spriteBaseKey}_front`
+        : `${opts.spriteBaseKey}_back`;
 
-      // Styling palette
-      const skinColor = opts.skinTone || "#F5D0A9";
-      const pantsColor = "#0F172A"; // Dark techwear cargo pants
-      const jacketBg = opts.jacketColor || (opts.isPlayer ? "#0B132B" : "#1E293B");
-      const accent = opts.isPlayer ? (opts.isTurbo ? "#22C55E" : "#38BDF8") : (opts.roleColor || "#38BDF8");
-      const shoeSole = "#F8FAFC";
+      const spriteImg = spritesRef.current[spriteKey] || spritesRef.current["player_back"];
+
+      // Biomechanical locomotion variables
+      const scale = depth * 0.22; // Target character height ~95px to 130px matching street perspective
+      const spriteW = spriteImg ? spriteImg.width * scale : 45 * depth;
+      const spriteH = spriteImg ? spriteImg.height * scale : 110 * depth;
+
+      const cycle = isMoving ? walkCycle : 0;
+      // Pelvic bounce when walking
+      const bodyBob = isMoving ? Math.abs(Math.sin(cycle)) * 4.5 * depth : Math.sin(Date.now() * 0.003) * 1.2 * depth;
+      // Natural walking sway / stride lean
+      const walkSway = isMoving ? Math.sin(cycle) * 0.045 : 0;
+      // Walking step oscillation
+      const stepSkew = isMoving ? Math.sin(cycle) * 0.06 : 0;
 
       ctx.save();
       ctx.translate(cx, cy);
 
-      // 1. Wet pavement ground shadow
-      const shadowW = 24 * scale;
-      const shadowH = 9 * scale;
+      // 1. Wet Pavement Contact Shadow
+      const shadowW = spriteW * 0.72;
+      const shadowH = shadowW * 0.35;
       ctx.beginPath();
       ctx.ellipse(0, 0, shadowW, shadowH, 0, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(4, 7, 15, 0.70)";
+      ctx.fillStyle = "rgba(4, 7, 15, 0.72)";
       ctx.fill();
 
       // Holographic floor ring for player
       if (opts.isPlayer) {
         ctx.beginPath();
-        ctx.ellipse(0, 0, shadowW * 1.3, shadowH * 1.3, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = opts.isTurbo ? "rgba(34, 197, 94, 0.7)" : "rgba(56, 189, 248, 0.65)";
-        ctx.lineWidth = 2 * scale;
+        ctx.ellipse(0, 0, shadowW * 1.25, shadowH * 1.25, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = opts.isTurbo ? "rgba(34, 197, 94, 0.85)" : "rgba(56, 189, 248, 0.80)";
+        ctx.lineWidth = 2.2 * depth;
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.ellipse(0, 0, shadowW * 1.6, shadowH * 1.6, 0, 0, Math.PI * 2);
-        ctx.fillStyle = opts.isTurbo ? "rgba(34, 197, 94, 0.12)" : "rgba(56, 189, 248, 0.10)";
+        ctx.ellipse(0, 0, shadowW * 1.5, shadowH * 1.5, 0, 0, Math.PI * 2);
+        ctx.fillStyle = opts.isTurbo ? "rgba(34, 197, 94, 0.14)" : "rgba(56, 189, 248, 0.12)";
         ctx.fill();
 
-        // Direction pointer when moving
+        // Direction pointer chevron when moving
         if (isMoving) {
           ctx.save();
           ctx.rotate(facing);
           ctx.beginPath();
-          ctx.moveTo(18 * scale, 0);
-          ctx.lineTo(11 * scale, -5 * scale);
-          ctx.lineTo(11 * scale, 5 * scale);
+          ctx.moveTo(shadowW * 1.3, 0);
+          ctx.lineTo(shadowW * 0.8, -6 * depth);
+          ctx.lineTo(shadowW * 0.8, 6 * depth);
           ctx.closePath();
           ctx.fillStyle = opts.isTurbo ? "#22C55E" : "#38BDF8";
           ctx.fill();
@@ -438,371 +444,99 @@ export default function CTWorldCanvas({
         }
       }
 
-      // Vertical landmarks
-      const groundY = 0;
-      const hipY = -38 * scale - bodyBob;
-      const torsoTop = hipY - 28 * scale;
-      const headCenterY = torsoTop - 13 * scale;
-
-      // 2. Body Rendering
-      if (isFacingRight || isFacingLeft) {
-        // --- SIDE PROFILE ---
-        const dirMult = isFacingRight ? 1 : -1;
-        const bFootX = -stride1 * dirMult;
-        const bFootY = groundY - lift1;
-        const fFootX = stride1 * dirMult;
-        const fFootY = groundY - lift2;
-
-        // Back Leg
-        ctx.lineWidth = 8.5 * scale;
-        ctx.lineCap = "round";
-        ctx.strokeStyle = "#080D1A";
-        ctx.beginPath();
-        ctx.moveTo(0, hipY);
-        const bKneeX = bFootX * 0.5 - 2 * dirMult * scale;
-        const bKneeY = hipY + (bFootY - hipY) * 0.55;
-        ctx.lineTo(bKneeX, bKneeY);
-        ctx.lineTo(bFootX, bFootY);
-        ctx.stroke();
-
-        // Back Chunky Sneaker
-        ctx.fillStyle = shoeSole;
-        ctx.beginPath();
-        ctx.roundRect(bFootX - (dirMult > 0 ? 6 : 9) * scale, bFootY - 6.5 * scale, 15 * scale, 6.5 * scale, 3 * scale);
-        ctx.fill();
-        ctx.fillStyle = accent;
-        ctx.fillRect(bFootX - (dirMult > 0 ? 5 : 7) * scale, bFootY - 6.5 * scale, 9 * scale, 3.2 * scale);
-
-        // Torso / Techwear Parka
+      // 2. Render Photorealistic Human Sprite
+      if (spriteImg && spriteImg.complete && spriteImg.naturalWidth > 0) {
         ctx.save();
-        ctx.rotate(shoulderTilt * dirMult);
-        ctx.fillStyle = jacketBg;
-        ctx.strokeStyle = accent;
-        ctx.lineWidth = 1.8 * scale;
-        ctx.beginPath();
-        ctx.roundRect(-10 * scale, torsoTop, 20 * scale, 28 * scale, 6 * scale);
-        ctx.fill();
-        ctx.stroke();
+        // Pivot at bottom center (feet)
+        ctx.translate(0, -bodyBob);
+        ctx.rotate(walkSway);
+        ctx.transform(1, 0, stepSkew, 1, 0, 0);
 
-        // Backpack on back side
-        const bpX = -11 * scale * dirMult;
-        ctx.fillStyle = "#090E17";
-        ctx.strokeStyle = accent;
-        ctx.lineWidth = 1.2 * scale;
-        ctx.beginPath();
-        ctx.roundRect(bpX - 6 * scale, torsoTop + 3 * scale, 12 * scale, 22 * scale, 4 * scale);
-        ctx.fill();
-        ctx.stroke();
+        // Horizontal flip if walking left
+        const flipX = isFacingLeft ? -1 : 1;
+        ctx.scale(flipX, 1);
 
-        // Front Leg
-        ctx.lineWidth = 9.5 * scale;
-        ctx.lineCap = "round";
-        ctx.strokeStyle = pantsColor;
-        ctx.beginPath();
-        ctx.moveTo(0, hipY);
-        const fKneeX = fFootX * 0.5 + 2 * dirMult * scale;
-        const fKneeY = hipY + (fFootY - hipY) * 0.55;
-        ctx.lineTo(fKneeX, fKneeY);
-        ctx.lineTo(fFootX, fFootY);
-        ctx.stroke();
-
-        // Front Chunky Sneaker
-        ctx.fillStyle = shoeSole;
-        ctx.beginPath();
-        ctx.roundRect(fFootX - (dirMult > 0 ? 6 : 9) * scale, fFootY - 6.5 * scale, 15 * scale, 6.5 * scale, 3 * scale);
-        ctx.fill();
-        ctx.fillStyle = accent;
-        ctx.fillRect(fFootX - (dirMult > 0 ? 5 : 7) * scale, fFootY - 6.5 * scale, 9 * scale, 3.2 * scale);
-
-        // Arm swinging opposite
-        const armSwing = -Math.sin(cycle) * 11 * scale * dirMult;
-        const armX = armSwing;
-        ctx.strokeStyle = jacketBg;
-        ctx.lineWidth = 7.5 * scale;
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(2 * dirMult * scale, torsoTop + 5 * scale);
-        ctx.lineTo(armX + 2 * dirMult * scale, hipY + 5 * scale);
-        ctx.stroke();
-
-        // Hand
-        ctx.fillStyle = skinColor;
-        ctx.beginPath();
-        ctx.arc(armX + 2 * dirMult * scale, hipY + 6.5 * scale, 3.5 * scale, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.drawImage(
+          spriteImg,
+          -spriteW / 2,
+          -spriteH,
+          spriteW,
+          spriteH
+        );
         ctx.restore();
-
-        // Head & Hair
-        ctx.fillStyle = skinColor;
-        ctx.beginPath();
-        ctx.arc(0, headCenterY, 9.5 * scale, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = "#0F172A";
-        ctx.beginPath();
-        ctx.arc(0, headCenterY - 1.5 * scale, 9.8 * scale, Math.PI * 0.8, Math.PI * 2.2);
-        ctx.fill();
-
-        // Cyber Visor
-        ctx.fillStyle = accent;
-        ctx.shadowColor = accent;
-        ctx.shadowBlur = 6;
-        ctx.beginPath();
-        ctx.roundRect(dirMult > 0 ? 1 * scale : -11 * scale, headCenterY - 2.5 * scale, 10 * scale, 4.5 * scale, 2 * scale);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      } else if (isFacingAway) {
-        // --- BACK VIEW ---
-        const legOffset = isMoving ? Math.sin(cycle) * 2.5 * scale : 0;
-        const lFootY = groundY - lift1;
-        const rFootY = groundY - lift2;
-
-        // Legs
-        ctx.lineWidth = 9 * scale;
-        ctx.lineCap = "round";
-        ctx.strokeStyle = pantsColor;
-        ctx.beginPath();
-        ctx.moveTo(-8 * scale, hipY);
-        ctx.lineTo(-8 * scale + legOffset, lFootY);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(8 * scale, hipY);
-        ctx.lineTo(8 * scale - legOffset, rFootY);
-        ctx.stroke();
-
-        // Chunky Sneakers
-        ctx.fillStyle = shoeSole;
-        ctx.beginPath();
-        ctx.roundRect(-14 * scale + legOffset, lFootY - 6.5 * scale, 12 * scale, 6.5 * scale, 3 * scale);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.roundRect(2 * scale - legOffset, rFootY - 6.5 * scale, 12 * scale, 6.5 * scale, 3 * scale);
-        ctx.fill();
-
-        // Torso / Jacket
-        ctx.save();
-        ctx.rotate(shoulderTilt);
-        ctx.fillStyle = jacketBg;
-        ctx.strokeStyle = accent;
-        ctx.lineWidth = 1.8 * scale;
-        ctx.beginPath();
-        ctx.roundRect(-14 * scale, torsoTop, 28 * scale, 28 * scale, 7 * scale);
-        ctx.fill();
-        ctx.stroke();
-
-        // Techwear Backpack
-        ctx.fillStyle = "#0A0E17";
-        ctx.strokeStyle = accent;
-        ctx.lineWidth = 1.4 * scale;
-        ctx.beginPath();
-        ctx.roundRect(-9 * scale, torsoTop + 3 * scale, 18 * scale, 21 * scale, 4.5 * scale);
-        ctx.fill();
-        ctx.stroke();
-
-        if (opts.isPlayer) {
-          ctx.font = `900 ${Math.round(8.5 * scale)}px Inter, sans-serif`;
-          ctx.fillStyle = accent;
-          ctx.shadowColor = accent;
-          ctx.shadowBlur = 8;
-          ctx.textAlign = "center";
-          ctx.fillText("CT", 0, torsoTop + 16 * scale);
-          ctx.shadowBlur = 0;
-        } else {
-          ctx.fillStyle = accent;
-          ctx.beginPath();
-          ctx.arc(0, torsoTop + 14 * scale, 3.8 * scale, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        // Arms swinging
-        const arm1 = Math.sin(cycle) * 5 * scale;
-        ctx.fillStyle = jacketBg;
-        ctx.beginPath();
-        ctx.roundRect(-19 * scale, torsoTop + 3 * scale + arm1, 6 * scale, 19 * scale, 3 * scale);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.roundRect(13 * scale, torsoTop + 3 * scale - arm1, 6 * scale, 19 * scale, 3 * scale);
-        ctx.fill();
-        ctx.restore();
-
-        // Head & Back of Hair
-        ctx.fillStyle = "#0F172A";
-        ctx.beginPath();
-        ctx.arc(0, headCenterY, 9.5 * scale, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = accent;
-        ctx.lineWidth = 1.5 * scale;
-        ctx.beginPath();
-        ctx.arc(0, headCenterY + 2 * scale, 8 * scale, 0.2 * Math.PI, 0.8 * Math.PI);
-        ctx.stroke();
-      } else {
-        // --- FRONT VIEW ---
-        const legOffset = isMoving ? Math.sin(cycle) * 2.5 * scale : 0;
-        const lFootY = groundY - lift1;
-        const rFootY = groundY - lift2;
-
-        // Legs
-        ctx.lineWidth = 9.5 * scale;
-        ctx.lineCap = "round";
-        ctx.strokeStyle = pantsColor;
-        ctx.beginPath();
-        ctx.moveTo(-8 * scale, hipY);
-        ctx.lineTo(-8 * scale + legOffset, lFootY);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(8 * scale, hipY);
-        ctx.lineTo(8 * scale - legOffset, rFootY);
-        ctx.stroke();
-
-        // Chunky Sneakers
-        ctx.fillStyle = shoeSole;
-        ctx.beginPath();
-        ctx.roundRect(-15 * scale + legOffset, lFootY - 6.5 * scale, 13 * scale, 6.5 * scale, 3 * scale);
-        ctx.fill();
-        ctx.fillStyle = accent;
-        ctx.fillRect(-14 * scale + legOffset, lFootY - 6.5 * scale, 9 * scale, 3.2 * scale);
-
-        ctx.fillStyle = shoeSole;
-        ctx.beginPath();
-        ctx.roundRect(2 * scale - legOffset, rFootY - 6.5 * scale, 13 * scale, 6.5 * scale, 3 * scale);
-        ctx.fill();
-        ctx.fillStyle = accent;
-        ctx.fillRect(5 * scale - legOffset, rFootY - 6.5 * scale, 9 * scale, 3.2 * scale);
-
-        // Torso / Jacket
-        ctx.save();
-        ctx.rotate(shoulderTilt);
-        ctx.fillStyle = jacketBg;
-        ctx.strokeStyle = accent;
-        ctx.lineWidth = 1.8 * scale;
-        ctx.beginPath();
-        ctx.roundRect(-14 * scale, torsoTop, 28 * scale, 28 * scale, 7 * scale);
-        ctx.fill();
-        ctx.stroke();
-
-        // Zipper
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
-        ctx.lineWidth = 1.5 * scale;
-        ctx.beginPath();
-        ctx.moveTo(0, torsoTop + 2 * scale);
-        ctx.lineTo(0, hipY);
-        ctx.stroke();
-
-        // Arms & Hands
-        const armSwing1 = Math.sin(cycle) * 6 * scale;
-        ctx.fillStyle = jacketBg;
-        ctx.beginPath();
-        ctx.roundRect(-19 * scale, torsoTop + 3 * scale + armSwing1, 6 * scale, 18 * scale, 3 * scale);
-        ctx.fill();
-        ctx.fillStyle = skinColor;
-        ctx.beginPath();
-        ctx.arc(-16 * scale, torsoTop + 22 * scale + armSwing1, 3.5 * scale, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = jacketBg;
-        ctx.beginPath();
-        ctx.roundRect(13 * scale, torsoTop + 3 * scale - armSwing1, 6 * scale, 18 * scale, 3 * scale);
-        ctx.fill();
-        ctx.fillStyle = skinColor;
-        ctx.beginPath();
-        ctx.arc(16 * scale, torsoTop + 22 * scale - armSwing1, 3.5 * scale, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
-        // Head & Neck
-        ctx.fillStyle = skinColor;
-        ctx.beginPath();
-        ctx.arc(0, headCenterY, 9.5 * scale, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = "#0F172A";
-        ctx.beginPath();
-        ctx.arc(0, headCenterY - 1.5 * scale, 9.8 * scale, Math.PI * 0.9, Math.PI * 2.1);
-        ctx.fill();
-
-        // Cyber Sunglasses / HUD Visor
-        ctx.fillStyle = accent;
-        ctx.shadowColor = accent;
-        ctx.shadowBlur = 8;
-        ctx.beginPath();
-        ctx.roundRect(-7.5 * scale, headCenterY - 3 * scale, 15 * scale, 5 * scale, 2.2 * scale);
-        ctx.fill();
-        ctx.shadowBlur = 0;
       }
 
-      // 3. Overhead Nameplate, Speech Bubble & Inspect Prompt
+      // 3. Overhead Glassmorphic Role Badge & Speech Bubble
       if (opts.handle) {
         const nameText = opts.handle;
         const roleText = opts.role || "TRADER";
-        const badgeY = headCenterY - 24 * scale;
+        const badgeY = -spriteH - 16 * depth;
 
-        ctx.font = `bold ${Math.max(9, Math.round(9.5 * scale))}px Inter, sans-serif`;
-        const nameW = ctx.measureText(nameText).width + 18 * scale;
-        const badgeH = 22 * scale;
+        ctx.font = `bold ${Math.max(9, Math.round(9.5 * depth))}px Inter, sans-serif`;
+        const nameW = ctx.measureText(nameText).width + 18 * depth;
+        const badgeH = 22 * depth;
 
         // Overhead glassmorphic name badge
         ctx.fillStyle = "rgba(7, 12, 22, 0.94)";
-        ctx.strokeStyle = accent;
-        ctx.lineWidth = 1.3 * scale;
+        ctx.strokeStyle = opts.roleColor || "#38BDF8";
+        ctx.lineWidth = 1.3 * depth;
         ctx.beginPath();
-        ctx.roundRect(-nameW / 2, badgeY - badgeH, nameW, badgeH, 6 * scale);
+        ctx.roundRect(-nameW / 2, badgeY - badgeH, nameW, badgeH, 6 * depth);
         ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = "#FFFFFF";
         ctx.textAlign = "center";
-        ctx.fillText(nameText, 0, badgeY - 10 * scale);
+        ctx.fillText(nameText, 0, badgeY - 10 * depth);
 
-        ctx.font = `bold ${Math.max(7, Math.round(7.5 * scale))}px Inter, sans-serif`;
-        ctx.fillStyle = accent;
-        ctx.fillText(roleText, 0, badgeY - 2.5 * scale);
+        ctx.font = `bold ${Math.max(7, Math.round(7.5 * depth))}px Inter, sans-serif`;
+        ctx.fillStyle = opts.roleColor || "#38BDF8";
+        ctx.fillText(roleText, 0, badgeY - 2.5 * depth);
 
         // Speech bubble
         if (opts.bubbleText) {
-          const bubbleY = badgeY - badgeH - 8 * scale;
-          ctx.font = `600 ${Math.max(8, Math.round(8.5 * scale))}px Inter, sans-serif`;
+          const bubbleY = badgeY - badgeH - 8 * depth;
+          ctx.font = `600 ${Math.max(8, Math.round(8.5 * depth))}px Inter, sans-serif`;
           const textW = ctx.measureText(opts.bubbleText).width;
-          const bubbleW = textW + 16 * scale;
-          const bubbleH = 20 * scale;
+          const bubbleW = textW + 16 * depth;
+          const bubbleH = 20 * depth;
 
           ctx.fillStyle = "rgba(10, 15, 29, 0.96)";
           ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-          ctx.lineWidth = 1 * scale;
+          ctx.lineWidth = 1 * depth;
           ctx.beginPath();
-          ctx.roundRect(-bubbleW / 2, bubbleY - bubbleH, bubbleW, bubbleH, 6 * scale);
+          ctx.roundRect(-bubbleW / 2, bubbleY - bubbleH, bubbleW, bubbleH, 6 * depth);
           ctx.fill();
           ctx.stroke();
 
           // Pointer
           ctx.beginPath();
-          ctx.moveTo(-3 * scale, bubbleY);
-          ctx.lineTo(0, bubbleY + 4 * scale);
-          ctx.lineTo(3 * scale, bubbleY);
+          ctx.moveTo(-3 * depth, bubbleY);
+          ctx.lineTo(0, bubbleY + 4 * depth);
+          ctx.lineTo(3 * depth, bubbleY);
           ctx.fillStyle = "rgba(10, 15, 29, 0.96)";
           ctx.fill();
 
           ctx.fillStyle = "#F8FAFC";
           ctx.textAlign = "center";
-          ctx.fillText(opts.bubbleText, 0, bubbleY - 6.5 * scale);
+          ctx.fillText(opts.bubbleText, 0, bubbleY - 6.5 * depth);
         }
 
         // Proximity Inspect prompt
         if (opts.showInspectPrompt) {
-          const inspectY = badgeY + 6 * scale;
-          ctx.font = `bold ${Math.max(7, Math.round(7.5 * scale))}px Inter, sans-serif`;
-          const promptW = 60 * scale;
-          const promptH = 15 * scale;
+          const inspectY = badgeY + 6 * depth;
+          ctx.font = `bold ${Math.max(7, Math.round(7.5 * depth))}px Inter, sans-serif`;
+          const promptW = 60 * depth;
+          const promptH = 15 * depth;
 
           ctx.fillStyle = "rgba(14, 165, 233, 0.95)";
           ctx.beginPath();
-          ctx.roundRect(-promptW / 2, inspectY, promptW, promptH, 4 * scale);
+          ctx.roundRect(-promptW / 2, inspectY, promptW, promptH, 4 * depth);
           ctx.fill();
 
           ctx.fillStyle = "#0F172A";
           ctx.textAlign = "center";
-          ctx.fillText("🔍 Inspect", 0, inspectY + 11 * scale);
+          ctx.fillText("🔍 Inspect", 0, inspectY + 11 * depth);
         }
       }
 
@@ -867,7 +601,7 @@ export default function CTWorldCanvas({
         sounds.playStep();
         targetPosRef.current = {
           x: Math.max(0.08, Math.min(0.92, worldClickX)),
-          y: Math.max(0.40, Math.min(0.85, worldClickY)),
+          y: Math.max(0.44, Math.min(0.82, worldClickY)),
         };
       }
     };
@@ -1026,7 +760,7 @@ export default function CTWorldCanvas({
               "based and memepilled \ud83c\udfad",
             ];
             t.bubbleText = lines[Math.floor(Math.random() * lines.length)];
-            t.bubbleTimer = 220 + Math.random() * 200;
+            t.bubbleTimer = 260 + Math.random() * 260;
           }
         }
       });
@@ -1043,11 +777,10 @@ export default function CTWorldCanvas({
 
       ctx.clearRect(0, 0, screenW, screenH);
 
-      // --- 4. RENDER ARENA BACKGROUND ---
+      // --- 4. RENDER CLEAN PROMENADE BACKGROUND ---
       if (isImageLoadedRef.current && bgImageRef.current) {
         ctx.drawImage(bgImageRef.current, -cam.x, -cam.y, worldW, worldH);
       } else {
-        // Futuristic Cyber Grid Fallback
         const grad = ctx.createLinearGradient(0, 0, 0, screenH);
         grad.addColorStop(0, "#080c16");
         grad.addColorStop(1, "#03060c");
@@ -1064,7 +797,6 @@ export default function CTWorldCanvas({
         // Proximity detection with player
         const distToPlayer = Math.hypot(p.x - col.x, p.y - col.y);
         if (distToPlayer < 0.032) {
-          // Collected!
           sounds.playCollect();
           if (onCollectXP) onCollectXP(col.xp, col.label);
 
@@ -1126,12 +858,11 @@ export default function CTWorldCanvas({
       });
       collectiblesRef.current = remainingCollectibles;
 
-      // Respawn collectibles if empty
       if (collectiblesRef.current.length === 0) {
         spawnCollectibles();
       }
 
-      // --- 6. Y-SORTED DEPTH RENDERING (HUMANOID CHARACTERS) ---
+      // --- 6. Y-SORTED DEPTH RENDERING (PHOTOREALISTIC STREETWEAR HUMANS) ---
       interface RenderableHuman {
         type: "player" | "trader";
         y: number;
@@ -1145,8 +876,8 @@ export default function CTWorldCanvas({
         const tx = t.x * worldW - cam.x;
         const ty = t.y * worldH - cam.y;
 
-        // Depth perspective scale: 0.80 at horizon, 1.45 at bottom
-        const depth = 0.85 + (t.y - 0.42) * 1.5;
+        // Depth perspective scale: 0.80 near bull stairs, 1.25 in foreground
+        const depth = 0.85 + (t.y - 0.42) * 1.0;
         const distToPlayer = Math.hypot(p.x - t.x, p.y - t.y);
         const showInspect = distToPlayer < 0.055;
 
@@ -1154,10 +885,9 @@ export default function CTWorldCanvas({
           type: "trader",
           y: ty,
           draw: () => {
-            drawArticulatedHuman(ctx, tx, ty, depth, t.facing, t.walkCycle, t.isMoving, {
+            drawPhotorealisticHuman(ctx, tx, ty, depth, t.facing, t.walkCycle, t.isMoving, {
+              spriteBaseKey: t.spriteKey,
               roleColor: t.roleColor,
-              jacketColor: t.jacketColor,
-              skinTone: t.skinTone,
               handle: t.handle,
               role: t.role,
               bubbleText: t.bubbleText,
@@ -1170,17 +900,16 @@ export default function CTWorldCanvas({
       // Add Player
       const px = p.x * worldW - cam.x;
       const py = p.y * worldH - cam.y;
-      const pDepth = 0.85 + (p.y - 0.42) * 1.5;
+      const pDepth = 0.85 + (p.y - 0.42) * 1.0;
 
       renderables.push({
         type: "player",
         y: py,
         draw: () => {
-          drawArticulatedHuman(ctx, px, py, pDepth, p.facing, p.walkCycle, p.isMoving, {
+          drawPhotorealisticHuman(ctx, px, py, pDepth, p.facing, p.walkCycle, p.isMoving, {
             isPlayer: true,
             isTurbo: isSprinting,
-            jacketColor: "#0B132B",
-            skinTone: "#F5D0A9",
+            spriteBaseKey: "player",
           });
         },
       });
@@ -1242,7 +971,7 @@ export default function CTWorldCanvas({
       window.removeEventListener("resize", resizeCanvas);
       canvas.removeEventListener("click", handleCanvasClick);
     };
-  }, [joystickVector, isSprinting, onInspectTrader, onCollectXP, onUpdateCoords, spawnCollectibles, drawArticulatedHuman]);
+  }, [joystickVector, isSprinting, onInspectTrader, onCollectXP, onUpdateCoords, spawnCollectibles, drawPhotorealisticHuman]);
 
   return (
     <div className="arena-canvas-wrapper">
