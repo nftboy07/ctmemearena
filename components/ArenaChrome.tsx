@@ -36,7 +36,7 @@ import type { Token } from "@/lib/types";
 import "./arena-chrome.css";
 import "./arena-redesign.css";
 import "./arena-cinematic.css";
-import "./arena-noir.css";
+import "./arena-kerala.css";
 import "./arena-gallery-polish.css";
 
 const money = (n: number) =>
@@ -338,39 +338,45 @@ export default function ArenaChrome() {
         onResetJump={() => setJumpDistrictId(null)}
       />
 
-      {/* Golden-noir start screen */}
+      {/* Kerala start screen — God's Own Arena */}
       {!hasEntered && (
-        <div className="noir-start-screen">
-          <div className="noir-start-veil" />
-          <div className="noir-start-inner">
-            <div className="noir-brand-row">
-              <div className="noir-logo">CT<em>ARENA</em></div>
-              <div className="noir-live-pill">
+        <div className="kerala-start-screen">
+          <div className="kerala-start-veil" />
+          <div className="kerala-start-inner">
+            <div className="kerala-brand-row">
+              <div className="kerala-logo">CT<em>ARENA</em></div>
+              <div className="kerala-live-pill">
                 <span className="live-dot" />
                 <span>SEASON 01 · LIVE</span>
               </div>
             </div>
-            <h1 className="noir-title">
-              OWN THE<br />
-              <span>NIGHT MARKET</span>
+            <div className="kerala-welcome">സ്വാഗതം · Welcome to</div>
+            <h1 className="kerala-title">
+              GOD'S OWN<br />
+              <span>ARENA</span>
             </h1>
-            <p className="noir-tagline">
-              The living world of Crypto Twitter — after dark. Walk over anything
-              with a number to claim it, chain pickups for <b>5x combos</b>, and don't
-              let the <b>SEC</b> catch you.
+            <p className="kerala-tagline">
+              Kerala's own crypto playground. Stroll the backwaters, walk over
+              <b> mangoes</b>, <b>jackfruit</b>, <b>flowers</b> &amp; <b>umbrellas</b> to
+              claim them — and play for your district.
             </p>
-            <div className="noir-stats">
-              <div className="noir-stat"><b>1,247</b><small>in the arena</small></div>
-              <div className="noir-stat"><b>48.2K</b><small>SOL claimed</small></div>
-              <div className="noir-stat"><b>5x</b><small>max combo</small></div>
+            <div className="kerala-districts">
+              {["Kozhikode", "Ernakulam", "Kochi", "Trivandrum"].map((d) => (
+                <span key={d} className="kerala-district">{d}</span>
+              ))}
             </div>
-            <button className="noir-enter-btn" onClick={enterArena}>
+            <div className="kerala-stats">
+              <div className="kerala-stat"><b>1,247</b><small>in the arena</small></div>
+              <div className="kerala-stat"><b>48.2K</b><small>SOL claimed</small></div>
+              <div className="kerala-stat"><b>5x</b><small>max combo</small></div>
+            </div>
+            <button className="kerala-enter-btn" onClick={enterArena}>
               Enter the arena
             </button>
-            <button className="noir-how-btn" onClick={() => setShowHelpModal(true)}>
+            <button className="kerala-how-btn" onClick={() => setShowHelpModal(true)}>
               How to play
             </button>
-            <div className="noir-domain">ctarena.xyz</div>
+            <div className="kerala-domain">ctarena.xyz</div>
           </div>
         </div>
       )}
