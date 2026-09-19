@@ -135,19 +135,6 @@ export default function ArenaChrome() {
     // First-visit tutorial now lives behind the start screen's HOW TO PLAY button
   }, []);
 
-  // Spotlight cards: feed cursor position to each glass card for hover glow
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      document.querySelectorAll(".arena-glass-card").forEach((el) => {
-        const r = (el as HTMLElement).getBoundingClientRect();
-        (el as HTMLElement).style.setProperty("--mx", `${e.clientX - r.left}px`);
-        (el as HTMLElement).style.setProperty("--my", `${e.clientY - r.top}px`);
-      });
-    };
-    window.addEventListener("mousemove", onMove);
-    return () => window.removeEventListener("mousemove", onMove);
-  }, []);
-
   const toggleSound = () => {
     const next = sounds.toggleMute();
     setIsMuted(next);
@@ -341,51 +328,38 @@ export default function ArenaChrome() {
       {/* Cinematic start screen — the arena lives behind it */}
       {!hasEntered && (
         <div className="arena-start-screen">
-          <div className="start-orb o1" />
-          <div className="start-orb o2" />
-          <div className="start-orb o3" />
-          <div className="start-floaties">
-            <span>🪙</span><span>💎</span><span>🪙</span><span>💰</span><span>💎</span><span>🪙</span>
-          </div>
           <div className="start-inner">
             <div className="start-live-pill">
               <span className="live-dot" />
               <span>SEASON 01 · LIVE</span>
             </div>
-            <h1 className="start-title">CT ARENA</h1>
+            <h1 className="start-title">CT Arena</h1>
             <p className="start-tagline">
-              The living world of Crypto Twitter. <b>Walk over anything with a number</b> to
-              claim it — chain pickups for <b>5x combos</b>, but don't let the <b>SEC</b> catch you at 5 stars.
+              The living world of Crypto Twitter. Walk over anything with a number
+              to claim it — chain pickups for <b>5x combos</b>, and don't let the <b>SEC</b> catch you.
             </p>
             <div className="start-features">
               <div className="start-feature">
                 <span className="sf-emoji">💎</span>
-                <div><b>COLLECT</b><small>SOL · diamonds · whale bags</small></div>
+                <div><b>Collect</b><small>SOL · diamonds · whale bags</small></div>
               </div>
               <div className="start-feature">
                 <span className="sf-emoji">🚨</span>
-                <div><b>OUTRUN</b><small>Dodge SEC agents at high heat</small></div>
+                <div><b>Outrun</b><small>Dodge SEC agents at high heat</small></div>
               </div>
               <div className="start-feature">
                 <span className="sf-emoji">🏆</span>
-                <div><b>FLEX</b><small>Climb the Fame Board</small></div>
+                <div><b>Flex</b><small>Climb the Fame Board</small></div>
               </div>
             </div>
             <button className="start-enter-btn" onClick={enterArena}>
-              ENTER THE ARENA
+              Enter the arena
             </button>
             <button className="start-how-btn" onClick={() => setShowHelpModal(true)}>
-              HOW TO PLAY
+              How to play
             </button>
             <div>
               <span className="start-domain">ctarena.xyz</span>
-            </div>
-          </div>
-          <div className="start-marquee" aria-hidden="true">
-            <div className="start-marquee-track">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <span key={i}>WALK&nbsp;&nbsp;✦&nbsp;&nbsp;COLLECT&nbsp;&nbsp;✦&nbsp;&nbsp;OUTRUN&nbsp;&nbsp;✦&nbsp;&nbsp;FLEX&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
-              ))}
             </div>
           </div>
         </div>
