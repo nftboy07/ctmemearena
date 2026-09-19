@@ -63,6 +63,16 @@ export interface Particle {
   life: number;
 }
 
+export interface SecAgent {
+  id: number;
+  x: number;
+  y: number;
+  speed: number;
+  facing: number;
+  walkCycle: number;
+  sirenPhase: number;
+}
+
 export interface CTWorldCanvasProps {
   joystickVector?: { x: number; y: number };
   isSprinting?: boolean;
@@ -74,6 +84,8 @@ export interface CTWorldCanvasProps {
   }) => void;
   onCollectXP?: (amount: number, label: string) => void;
   onUpdateCoords?: (coords: { x: number; y: number; district: string }) => void;
+  onHeatChange?: (heat: number) => void;
+  onBusted?: () => void;
   jumpDistrictId?: string | null;
   onResetJump?: () => void;
 }
@@ -225,6 +237,8 @@ export default function CTWorldCanvas({
   onInspectTrader,
   onCollectXP,
   onUpdateCoords,
+  onHeatChange,
+  onBusted,
   jumpDistrictId,
   onResetJump,
 }: CTWorldCanvasProps) {
@@ -247,6 +261,15 @@ export default function CTWorldCanvas({
   const collectiblesRef = useRef<Collectible[]>([]);
   const floatTextsRef = useRef<FloatingText[]>([]);
   const particlesRef = useRef<Particle[]>([]);
+  const shakeRef = useRef(0);
+  const ringsRef = useRef<{ x: number; y: number; r: number; maxR: number; color: string; alpha: number }[]>([]);
+  // GTA wanted system — heat, SEC chasers, busted state
+  const agentsRef = useRef<SecAgent[]>([]);
+  const heatRef = useRef(0);
+  const lastHeatReported = useRef(-1);
+  const bustedCooldownRef = useRef(0);
+  const bustedFlashRef = useRef(0);
+  const agentIdRef = useRef(1);
   const bgImageRef = useRef<HTMLImageElement | null>(null);
   const isImageLoadedRef = useRef(false);
 
@@ -700,6 +723,22 @@ export default function CTWorldCanvas({
             life: 20,
           });
         }
+        // GTA speed streaks — white-hot lines whipping past while sprinting
+        if (isSprinting && p.isMoving) {
+          for (let s = 0; s < 2; s++) {
+            const back = p.facing + Math.PI + (Math.random() - 0.5) * 0.9;
+            particlesRef.current.push({
+              x: p.x * worldW + (Math.random() - 0.5) * 90,
+              y: p.y * worldH + (Math.random() - 0.5) * 70,
+              vx: Math.cos(back) * 9,
+              vy: Math.sin(back) * 9,
+              size: Math.random() * 1.6 + 0.8,
+              color: "#E0F2FE",
+              alpha: 0.9,
+              life: 14,
+            });
+          }
+        }
       } else {
         p.vx *= 0.7;
         p.vy *= 0.7;
@@ -773,6 +812,96 @@ export default function CTWorldCanvas({
         }
       });
 
+      // --- 2b. GTA WANTED SYSTEM — heat, SEC chasers, busted ---
+      const prevWanted =
+        heatRef.current >= 80 ? 5 : heatRef.current >= 60 ? 4 : heatRef.current >= 40 ? 3 : heatRef.current >= 20 ? 2 : heatRef.current > 1 ? 1 : 0;
+
+      // Heat dynamics: sprinting hot, laying low cools off
+      if (isSprinting && p.isMoving) {
+        heatRef.current = Math.min(100, heatRef.current + 0.35 * dt);
+      } else {
+        heatRef.current = Math.max(0, heatRef.current - (p.isMoving ? 0.10 : 0.22) * dt);
+      }
+
+      const wanted =
+        heatRef.current >= 80 ? 5 : heatRef.current >= 60 ? 4 : heatRef.current >= 40 ? 3 : heatRef.current >= 20 ? 2 : heatRef.current > 1 ? 1 : 0;
+      if (wanted > prevWanted && wanted > 0) sounds.playInspect(); // alert sting on heat-up
+
+      // Report heat to HUD (only when the integer changes)
+      const heatInt = Math.round(heatRef.current);
+      if (heatInt !== lastHeatReported.current) {
+        lastHeatReported.current = heatInt;
+        if (onHeatChange) onHeatChange(heatInt);
+      }
+
+      if (bustedCooldownRef.current > 0) bustedCooldownRef.current -= dt;
+
+      // Desired chaser count scales with wanted level
+      const desiredAgents = bustedCooldownRef.current > 0 ? 0 : wanted >= 4 ? 3 : wanted >= 2 ? 2 : wanted >= 1 ? 1 : 0;
+      while (agentsRef.current.length < desiredAgents) {
+        // Spawn at a random edge near the player, just off-screen
+        const ang = Math.random() * Math.PI * 2;
+        const spawnDist = 0.16 + Math.random() * 0.06;
+        agentsRef.current.push({
+          id: agentIdRef.current++,
+          x: Math.max(0.08, Math.min(0.92, p.x + Math.cos(ang) * spawnDist)),
+          y: Math.max(0.44, Math.min(0.82, p.y + Math.sin(ang) * spawnDist * 0.6)),
+          speed: 0.00082 + wanted * 0.00005,
+          facing: Math.atan2(p.y - p.y, 1),
+          walkCycle: Math.random() * 6,
+          sirenPhase: Math.random() * 10,
+        });
+        // Siren burst particles on spawn
+        for (let i = 0; i < 6; i++) {
+          particlesRef.current.push({
+            x: p.x * worldW,
+            y: p.y * worldH,
+            vx: (Math.random() - 0.5) * 4,
+            vy: (Math.random() - 0.5) * 4,
+            size: Math.random() * 3 + 2,
+            color: i % 2 ? "#EF4444" : "#3B82F6",
+            alpha: 1,
+            life: 26,
+          });
+        }
+      }
+      if (agentsRef.current.length > desiredAgents) {
+        agentsRef.current = agentsRef.current.slice(0, desiredAgents);
+      }
+
+      // Chase AI + catch detection
+      const keptAgents: SecAgent[] = [];
+      agentsRef.current.forEach((a) => {
+        const dx = p.x - a.x;
+        const dy = p.y - a.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 0.0005) {
+          a.facing = Math.atan2(dy, dx);
+          // Slight weave so they don't stack perfectly
+          const weave = Math.sin(Date.now() * 0.004 + a.sirenPhase) * 0.25;
+          const moveAng = a.facing + weave * 0.3;
+          a.x += Math.cos(moveAng) * a.speed * dt;
+          a.y += Math.sin(moveAng) * a.speed * dt;
+          a.walkCycle += 0.2 * dt;
+        }
+        a.sirenPhase += 0.12 * dt;
+        a.x = Math.max(0.08, Math.min(0.92, a.x));
+        a.y = Math.max(0.44, Math.min(0.82, a.y));
+
+        if (dist < 0.024 && bustedCooldownRef.current <= 0) {
+          // BUSTED — SEC caught you
+          bustedCooldownRef.current = 200;
+          bustedFlashRef.current = 1;
+          shakeRef.current = 16;
+          heatRef.current = 0;
+          if (onBusted) onBusted();
+          // Don't keep this agent; clear the rest below via cooldown
+          return;
+        }
+        keptAgents.push(a);
+      });
+      agentsRef.current = bustedCooldownRef.current > 0 ? [] : keptAgents;
+
       // --- 3. CAMERA & VIEWPORT SMOOTHING ---
       const cam = {
         x: p.x * worldW - screenW / 2,
@@ -782,6 +911,15 @@ export default function CTWorldCanvas({
       // Clamp camera to world bounds
       cam.x = Math.max(0, Math.min(worldW - screenW, cam.x));
       cam.y = Math.max(0, Math.min(worldH - screenH, cam.y));
+
+      // Screen shake kick (decays each frame) — triggered by rare pickups
+      if (shakeRef.current > 0.3) {
+        cam.x += (Math.random() - 0.5) * shakeRef.current;
+        cam.y += (Math.random() - 0.5) * shakeRef.current;
+        shakeRef.current *= 0.88;
+      } else {
+        shakeRef.current = 0;
+      }
 
       ctx.clearRect(0, 0, screenW, screenH);
 
@@ -800,13 +938,40 @@ export default function CTWorldCanvas({
       // --- 5. RENDER COLLECTIBLES ---
       const remainingCollectibles: Collectible[] = [];
       collectiblesRef.current.forEach((col) => {
+        // Magnet: nearby collectibles drift toward the player (feels great)
+        const mdx = p.x - col.x;
+        const mdy = p.y - col.y;
+        const mdist = Math.hypot(mdx, mdy);
+        if (mdist < 0.075 && mdist > 0.0005) {
+          const pull = (0.075 - mdist) * 0.10 * dt;
+          col.x += (mdx / mdist) * pull;
+          col.y += (mdy / mdist) * pull;
+        }
+
         const colScreenX = col.x * worldW - cam.x;
         const colScreenY = col.y * worldH - cam.y;
 
         // Proximity detection with player
         const distToPlayer = Math.hypot(p.x - col.x, p.y - col.y);
         if (distToPlayer < 0.032) {
+          const isRare = col.type !== "sol_coin";
           sounds.playCollect();
+          if (isRare) {
+            // Screen shake kick + expanding shockwave ring on rare pickups
+            shakeRef.current = Math.min(14, shakeRef.current + (col.type === "god_candle" ? 9 : 6));
+            ringsRef.current.push({
+              x: col.x * worldW,
+              y: col.y * worldH,
+              r: 8,
+              maxR: col.type === "god_candle" ? 90 : 65,
+              color: col.color,
+              alpha: 0.9,
+            });
+          }
+          // Heat gain — big scores attract the SEC
+          const heatGain =
+            col.type === "whale_bag" ? 14 : col.type === "god_candle" ? 10 : col.type === "diamond" ? 5 : 2;
+          heatRef.current = Math.min(100, heatRef.current + heatGain);
           if (onCollectXP) onCollectXP(col.xp, col.label);
 
           floatTextsRef.current.push({
@@ -819,18 +984,19 @@ export default function CTWorldCanvas({
             life: 45,
           });
 
-          // Burst particles
-          for (let i = 0; i < 8; i++) {
-            const ang = (i / 8) * Math.PI * 2;
+          // Burst particles (bigger burst for rare pickups)
+          const burstCount = isRare ? 18 : 8;
+          for (let i = 0; i < burstCount; i++) {
+            const ang = (i / burstCount) * Math.PI * 2;
             particlesRef.current.push({
               x: col.x * worldW,
               y: col.y * worldH,
-              vx: Math.cos(ang) * (Math.random() * 2 + 1),
-              vy: Math.sin(ang) * (Math.random() * 2 + 1),
+              vx: Math.cos(ang) * (Math.random() * 2 + 1) * (isRare ? 1.6 : 1),
+              vy: Math.sin(ang) * (Math.random() * 2 + 1) * (isRare ? 1.6 : 1),
               size: Math.random() * 3 + 2,
               color: col.color,
               alpha: 1,
-              life: 30,
+              life: isRare ? 42 : 30,
             });
           }
           return;
@@ -927,6 +1093,62 @@ export default function CTWorldCanvas({
       renderables.sort((a, b) => a.y - b.y);
       renderables.forEach((r) => r.draw());
 
+      // --- 6b. SEC AGENTS (GTA chasers) ---
+      agentsRef.current.forEach((a) => {
+        const ax = a.x * worldW - cam.x;
+        const ay = a.y * worldH - cam.y;
+        if (ax < -80 || ax > screenW + 80 || ay < -120 || ay > screenH + 80) return;
+        const depth = 0.85 + (a.y - 0.42) * 1.0;
+        const bob = Math.abs(Math.sin(a.walkCycle)) * 4 * depth;
+
+        ctx.save();
+        ctx.translate(ax, ay);
+
+        // Contact shadow
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 26 * depth, 9 * depth, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(4, 7, 15, 0.72)";
+        ctx.fill();
+
+        // Dark suit body
+        const bodyH = 62 * depth;
+        const bodyW = 30 * depth;
+        ctx.fillStyle = "#0F172A";
+        ctx.strokeStyle = "#1E293B";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(-bodyW / 2, -bodyH - bob, bodyW, bodyH, 8 * depth);
+        ctx.fill();
+        ctx.stroke();
+        // Tie
+        ctx.fillStyle = "#B91C1C";
+        ctx.fillRect(-2.5 * depth, -bodyH + 8 * depth - bob, 5 * depth, 22 * depth);
+        // Head
+        ctx.beginPath();
+        ctx.arc(0, -bodyH - 14 * depth - bob, 11 * depth, 0, Math.PI * 2);
+        ctx.fillStyle = "#1E293B";
+        ctx.fill();
+        // Sunglasses
+        ctx.fillStyle = "#020617";
+        ctx.fillRect(-9 * depth, -bodyH - 17 * depth - bob, 18 * depth, 5 * depth);
+        // Flashing siren light above head
+        const sirenOn = Math.sin(a.sirenPhase * 2.4) > 0;
+        ctx.beginPath();
+        ctx.arc(0, -bodyH - 32 * depth - bob, 6 * depth, 0, Math.PI * 2);
+        ctx.fillStyle = sirenOn ? "#EF4444" : "#3B82F6";
+        ctx.shadowColor = ctx.fillStyle;
+        ctx.shadowBlur = 14;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        // SEC tag
+        ctx.font = `900 ${10 * depth}px Inter, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillStyle = sirenOn ? "#FCA5A5" : "#93C5FD";
+        ctx.fillText("SEC", 0, -bodyH - 42 * depth - bob);
+
+        ctx.restore();
+      });
+
       // --- 7. FLOATING TEXTS ---
       const activeTexts: FloatingText[] = [];
       floatTextsRef.current.forEach((t) => {
@@ -970,6 +1192,51 @@ export default function CTWorldCanvas({
       ctx.globalAlpha = 1;
       particlesRef.current = activeParticles;
 
+      // --- 8b. SHOCKWAVE RINGS (rare pickup celebration) ---
+      const activeRings: typeof ringsRef.current = [];
+      ringsRef.current.forEach((rg) => {
+        rg.r += (rg.maxR - rg.r) * 0.16 * dt + 1.2 * dt;
+        rg.alpha *= Math.pow(0.90, dt);
+        if (rg.r < rg.maxR && rg.alpha > 0.03) {
+          const sx = rg.x - cam.x;
+          const sy = rg.y - cam.y;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(sx, sy, rg.r, 0, Math.PI * 2);
+          ctx.strokeStyle = rg.color;
+          ctx.globalAlpha = Math.max(0, rg.alpha);
+          ctx.lineWidth = 3;
+          ctx.shadowColor = rg.color;
+          ctx.shadowBlur = 12;
+          ctx.stroke();
+          // inner echo ring
+          ctx.beginPath();
+          ctx.arc(sx, sy, rg.r * 0.62, 0, Math.PI * 2);
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.restore();
+          activeRings.push(rg);
+        }
+      });
+      ctx.globalAlpha = 1;
+      ringsRef.current = activeRings;
+
+      // --- 8c. BUSTED red flash ---
+      if (bustedFlashRef.current > 0.02) {
+        ctx.save();
+        ctx.globalAlpha = Math.min(0.45, bustedFlashRef.current * 0.45);
+        const vg = ctx.createRadialGradient(
+          screenW / 2, screenH / 2, screenH * 0.25,
+          screenW / 2, screenH / 2, screenH * 0.75
+        );
+        vg.addColorStop(0, "rgba(220, 38, 38, 0)");
+        vg.addColorStop(1, "rgba(220, 38, 38, 0.9)");
+        ctx.fillStyle = vg;
+        ctx.fillRect(0, 0, screenW, screenH);
+        ctx.restore();
+        bustedFlashRef.current *= Math.pow(0.94, dt);
+      }
+
       animId = requestAnimationFrame(render);
     };
 
@@ -980,7 +1247,7 @@ export default function CTWorldCanvas({
       window.removeEventListener("resize", resizeCanvas);
       canvas.removeEventListener("click", handleCanvasClick);
     };
-  }, [joystickVector, isSprinting, onInspectTrader, onCollectXP, onUpdateCoords, spawnCollectibles, drawPhotorealisticHuman]);
+  }, [joystickVector, isSprinting, onInspectTrader, onCollectXP, onUpdateCoords, onHeatChange, onBusted, spawnCollectibles, drawPhotorealisticHuman]);
 
   return (
     <div className="arena-canvas-wrapper">
