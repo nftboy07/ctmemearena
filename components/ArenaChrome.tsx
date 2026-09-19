@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   ArrowLeftRight,
@@ -9,6 +9,8 @@ import {
   CheckSquare,
   ChevronRight,
   Compass,
+  Eye,
+  EyeOff,
   Flag,
   Gamepad2,
   HelpCircle,
@@ -61,8 +63,56 @@ export default function ArenaChrome() {
 
   // Market & Events data
   const [market, setMarket] = useState<Token[]>(demoTokens);
-  const [toastMessage, setToastMessage] = useState("");
+  const [toasts, setToasts] = useState<{ id: number; msg: string }[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
+
+  // Combo system — chained pickups multiply XP
+  const [combo, setCombo] = useState(0);
+  const [comboKey, setComboKey] = useState(0); // retriggers countdown animation
+  const lastPickupAt = useRef(0);
+  const comboCountRef = useRef(0);
+  const comboTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // HUD visibility + collapsible right panel
+  const [hudHidden, setHudHidden] = useState(false);
+  const [rightCollapsed, setRightCollapsed] = useState(false);
+
+  // Level-up celebration overlay
+  const [levelUpFlash, setLevelUpFlash] = useState<number | null>(null);
+
+  // Session stats
+  const [totalCollected, setTotalCollected] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
+
+  // GTA wanted system — heat 0-100 synced from canvas
+  const [heat, setHeat] = useState(0);
+  const wantedLevel = heat >= 80 ? 5 : heat >= 60 ? 4 : heat >= 40 ? 3 : heat >= 20 ? 2 : heat > 1 ? 1 : 0;
+
+  // Sprint stamina 0-100
+  const [stamina, setStamina] = useState(100);
+  const staminaRef = useRef(100);
+  const setStaminaBoth = (v: number | ((p: number) => number)) => {
+    setStamina((prev) => {
+      const next = typeof v === "function" ? (v as (p: number) => number)(prev) : v;
+      staminaRef.current = Math.max(0, Math.min(100, next));
+      return staminaRef.current;
+    });
+  };
+
+  const handleHeatChange = useCallback((h: number) => setHeat(h), []);
+
+  // Busted by the SEC — lose a cut of XP, combo wiped, heat cleared (canvas-side)
+  const handleBusted = useCallback(() => {
+    setPlayerXP((prev) => {
+      const penalty = Math.max(25, Math.round(prev * 0.1));
+      showToast(`🚨 BUSTED! The SEC seized ${penalty} XP`);
+      return Math.max(0, prev - penalty);
+    });
+    comboCountRef.current = 0;
+    setCombo(0);
+    setIsSprinting(false);
+    sounds.playDistrictSwoosh();
+  }, []);
 
   const events = [
     { type: "whale", title: "Whale Buy", sub: "+250,000 USDC", time: "2m", icon: "🐋" },
@@ -96,19 +146,107 @@ export default function ArenaChrome() {
     } catch {}
   };
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(""), 2800);
+  // Stamina drain / regen ticker
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (isSprinting) {
+        const next = Math.max(0, staminaRef.current - 2);
+        setStaminaBoth(next);
+        if (next <= 0) {
+          setIsSprinting(false);
+          showToast("😮‍💨 Gassed out — catch your breath");
+        }
+      } else if (staminaRef.current < 100) {
+        setStaminaBoth(Math.min(100, staminaRef.current + 2.5));
+      }
+    }, 120);
+    return () => clearInterval(id);
+  }, [isSprinting]);
+
+  const tryStartSprint = () => {
+    if (staminaRef.current > 8) {
+      setIsSprinting(true);
+      sounds.playBoost();
+    } else {
+      showToast("😮‍💨 Too gassed to sprint — stamina low");
+    }
   };
 
-  // Collect XP callback (Little Kerala style item pickup)
+  // Keyboard shortcuts: H = hide HUD, M = map, Q = quests, Shift = sprint, Esc = close
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) return;
+      if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
+        if (!e.repeat) tryStartSprint();
+        return;
+      }
+      const k = e.key.toLowerCase();
+      if (k === "h") {
+        setHudHidden((v) => !v);
+      } else if (k === "m") {
+        sounds.playDistrictSwoosh();
+        setShowModal((m) => (m === "MAP" ? null : "MAP"));
+      } else if (k === "q") {
+        setShowModal((m) => (m === "QUESTS" ? null : "QUESTS"));
+      } else if (k === "escape") {
+        setShowModal(null);
+        setSelectedTrader(null);
+        setShowHelpModal(false);
+        setShowMobileDrawer(false);
+      }
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === "ShiftLeft" || e.code === "ShiftRight") setIsSprinting(false);
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("keyup", onKeyUp);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keyup", onKeyUp);
+    };
+  }, []);
+
+  const showToast = (msg: string) => {
+    const id = Date.now() + Math.random();
+    setToasts((prev) => [...prev.slice(-2), { id, msg }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 2800);
+  };
+
+  // Collect XP callback (Little Kerala style item pickup) with combo multiplier
   const handleCollectXP = useCallback((amount: number, itemType: string) => {
+    const now = Date.now();
+    const chained = now - lastPickupAt.current < 2500;
+    lastPickupAt.current = now;
+
+    if (comboTimeout.current) clearTimeout(comboTimeout.current);
+    comboTimeout.current = setTimeout(() => {
+      comboCountRef.current = 0;
+      setCombo(0);
+    }, 2500);
+
+    comboCountRef.current = chained ? comboCountRef.current + 1 : 1;
+    const comboCount = comboCountRef.current;
+    setCombo(comboCount);
+    setBestCombo((b) => Math.max(b, comboCount));
+    setComboKey((k) => k + 1);
+    setTotalCollected((t) => t + 1);
+
+    const multiplier = Math.min(comboCount, 5);
+    const finalAmount = Math.round(amount * multiplier);
+
     setPlayerXP((prev) => {
-      const next = prev + amount;
+      const next = prev + finalAmount;
       if (next >= 5000) {
-        setPlayerLevel((l) => l + 1);
+        setPlayerLevel((l) => {
+          const nl = l + 1;
+          setLevelUpFlash(nl);
+          setTimeout(() => setLevelUpFlash(null), 2600);
+          return nl;
+        });
         sounds.playDiamond();
-        showToast("🎉 LEVEL UP! You reached Level 13!");
         return next - 5000;
       }
       return next;
@@ -172,7 +310,7 @@ export default function ArenaChrome() {
   ];
 
   return (
-    <main className="arena-root-viewport">
+    <main className={`arena-root-viewport ${hudHidden ? "hud-hidden" : ""}`}>
       {/* 1. Full-Screen Interactive Game Canvas (Little Kerala 3D Promenade) */}
       <CTWorldCanvas
         joystickVector={joystickVector}
@@ -180,9 +318,44 @@ export default function ArenaChrome() {
         onInspectTrader={handleInspectTrader}
         onCollectXP={handleCollectXP}
         onUpdateCoords={setPlayerCoords}
+        onHeatChange={handleHeatChange}
+        onBusted={handleBusted}
         jumpDistrictId={jumpDistrictId}
         onResetJump={() => setJumpDistrictId(null)}
       />
+
+      {/* Combo badge — chained pickups multiply XP */}
+      {combo >= 2 && !hudHidden && (
+        <div className="arena-combo-badge" key={comboKey} title={`Best combo this session: ${bestCombo}x`}>
+          <span className="combo-flame">🔥</span>
+          <span className="combo-text">{Math.min(combo, 5)}x COMBO</span>
+          <span className="combo-count">{combo}</span>
+          <span className="combo-timer-bar" key={`t-${comboKey}`} />
+        </div>
+      )}
+
+      {/* Wanted level — GTA heat indicator */}
+      {wantedLevel > 0 && !hudHidden && (
+        <div className={`arena-wanted-badge wanted-${wantedLevel}`}>
+          <span className="wanted-stars">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <span key={i} className={i < wantedLevel ? "star lit" : "star"}>
+                ★
+              </span>
+            ))}
+          </span>
+          <span className="wanted-label">
+            {wantedLevel >= 4 ? "🚨 SEC TASK FORCE INBOUND" : wantedLevel >= 2 ? "🚨 SEC AGENTS NEARBY" : "👀 Heat rising — lay low"}
+          </span>
+        </div>
+      )}
+      <button
+        className="arena-hud-toggle"
+        onClick={() => setHudHidden((v) => !v)}
+        title={hudHidden ? "Show HUD (H)" : "Hide HUD (H)"}
+      >
+        {hudHidden ? <Eye size={16} /> : <EyeOff size={16} />}
+      </button>
 
       {/* 2. Top-Left Logo & Subtitle */}
       <div className="arena-top-left">
@@ -260,7 +433,14 @@ export default function ArenaChrome() {
       </aside>
 
       {/* 5. Right Side Floating Cards Stack (Matching Screenshot) */}
-      <aside className="arena-right-stack">
+      <button
+        className="arena-right-collapse-btn"
+        onClick={() => setRightCollapsed((v) => !v)}
+        title={rightCollapsed ? "Expand side panel" : "Collapse side panel"}
+      >
+        <ChevronRight size={16} className={rightCollapsed ? "" : "rotated"} />
+      </button>
+      <aside className={`arena-right-stack ${rightCollapsed ? "collapsed" : ""}`}>
         {/* Card 1: LIVE EVENTS */}
         <div className="arena-glass-card events-card">
           <div className="card-header-row">
@@ -355,6 +535,12 @@ export default function ArenaChrome() {
               <div className="hud-xp-fill" style={{ width: `${(playerXP / 5000) * 100}%` }} />
             </div>
             <div className="hud-xp-numbers">X: {playerXP} / 5,000 XP</div>
+            <div className="hud-stamina-track" title="Sprint stamina — hold SHIFT or SPRINT">
+              <div
+                className={`hud-stamina-fill ${stamina < 25 ? "low" : ""}`}
+                style={{ width: `${stamina}%` }}
+              />
+            </div>
           </div>
         </div>
 
@@ -461,13 +647,11 @@ export default function ArenaChrome() {
             }}
             onTouchStart={(e) => {
               e.preventDefault();
-              setIsSprinting(true);
-              sounds.playBoost();
+              tryStartSprint();
             }}
             onTouchEnd={() => setIsSprinting(false)}
             onMouseDown={() => {
-              setIsSprinting(true);
-              sounds.playBoost();
+              tryStartSprint();
             }}
             onMouseUp={() => setIsSprinting(false)}
           >
@@ -847,9 +1031,19 @@ export default function ArenaChrome() {
               <div className="help-box">
                 <h4>🕹️ MOVEMENT</h4>
                 <p>
-                  <b>PC:</b> Use <code>W, A, S, D</code> or <code>Arrow Keys</code>. Click anywhere on the promenade to walk.
+                  <b>PC:</b> Use <code>W, A, S, D</code> or <code>Arrow Keys</code>. Click anywhere on the promenade to walk. Hold <code>SHIFT</code> to sprint (drains stamina).
                   <br />
                   <b>Mobile:</b> Drag the virtual analog joystick on the bottom-left. Tap <code>SPRINT</code> for turbo speed!
+                  <br />
+                  <b>Keys:</b> <code>H</code> hide HUD · <code>M</code> map · <code>Q</code> quests · <code>ESC</code> close
+                </p>
+              </div>
+
+              <div className="help-box">
+                <h4>🚨 WANTED — DON'T LET THE SEC CATCH YOU</h4>
+                <p>
+                  Sprinting and grabbing <b>Whale Bags</b> raises your <b>heat</b>. At ★ wanted levels, <b>SEC agents</b> spawn and chase you down!
+                  Outrun them or lay low to cool off. Get caught and they <b>seize 10% of your XP</b>. Chain pickups for <b>combo multipliers</b> up to 5x — but combos die if you're busted.
                 </p>
               </div>
 
@@ -875,8 +1069,26 @@ export default function ArenaChrome() {
         </div>
       )}
 
-      {/* Floating Toast Message */}
-      {toastMessage && <div className="arena-toast-pill">{toastMessage}</div>}
+      {/* Floating Toast Stack */}
+      <div className="arena-toast-stack">
+        {toasts.map((t) => (
+          <div className="arena-toast-pill" key={t.id}>
+            {t.msg}
+          </div>
+        ))}
+      </div>
+
+      {/* Level-up celebration overlay */}
+      {levelUpFlash !== null && (
+        <div className="arena-levelup-overlay">
+          <div className="levelup-burst" />
+          <div className="levelup-card">
+            <div className="levelup-kicker">LEVEL UP</div>
+            <div className="levelup-number">{levelUpFlash}</div>
+            <div className="levelup-sub">Rise to legend continues</div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
