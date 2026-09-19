@@ -288,6 +288,9 @@ export default function CTWorldCanvas({
   const leadRef = useRef({ x: 0, y: 0 });
   const camRef = useRef({ x: 0, y: 0 });
 
+  // Ambient atmosphere motes (golden dust drifting through the world)
+  const ambientRef = useRef<Particle[]>([]);
+
   // Spawn Collectibles around the arena
   const spawnCollectibles = useCallback(() => {
     const items: Collectible[] = [
@@ -1073,7 +1076,7 @@ export default function CTWorldCanvas({
         ctx.strokeStyle = col.color;
         ctx.lineWidth = 2;
         ctx.shadowColor = col.color;
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 10 + Math.sin(Date.now() * 0.006 + col.bobOffset) * 6;
         ctx.fill();
         ctx.stroke();
 
@@ -1282,7 +1285,62 @@ export default function CTWorldCanvas({
       ctx.globalAlpha = 1;
       ringsRef.current = activeRings;
 
-      // --- 8c. BUSTED red flash ---
+      // --- 8c. ATMOSPHERE — golden-hour grade, vignette, drifting dust ---
+      // Keep the dust field populated
+      if (ambientRef.current.length < 46) {
+        ambientRef.current.push({
+          x: Math.random() * worldW,
+          y: Math.random() * worldH,
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: -Math.random() * 0.3 - 0.08,
+          size: Math.random() * 2.2 + 0.8,
+          color: Math.random() > 0.45 ? "#FFD98A" : "#9FE8FF",
+          alpha: Math.random() * 0.5 + 0.25,
+          life: 1e9,
+        });
+      }
+      const nowT = Date.now() * 0.001;
+      ambientRef.current.forEach((m, i) => {
+        m.x += m.vx * dt;
+        m.y += m.vy * dt;
+        if (m.y < 0) { m.y = worldH; m.x = Math.random() * worldW; }
+        if (m.x < 0) m.x = worldW;
+        if (m.x > worldW) m.x = 0;
+        const sx = m.x - cam.x;
+        const sy = m.y - cam.y;
+        if (sx < -20 || sx > screenW + 20 || sy < -20 || sy > screenH + 20) return;
+        const twinkle = 0.55 + 0.45 * Math.sin(nowT * 2 + i * 1.7);
+        ctx.save();
+        ctx.globalAlpha = m.alpha * twinkle * 0.8;
+        ctx.shadowColor = m.color;
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = m.color;
+        ctx.beginPath();
+        ctx.arc(sx, sy, m.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+      ctx.globalAlpha = 1;
+
+      // Golden-hour color grade (screen space)
+      const grade = ctx.createLinearGradient(0, 0, 0, screenH);
+      grade.addColorStop(0, "rgba(255,170,80,0.05)");
+      grade.addColorStop(0.55, "rgba(255,120,60,0.03)");
+      grade.addColorStop(1, "rgba(120,40,120,0.09)");
+      ctx.fillStyle = grade;
+      ctx.fillRect(0, 0, screenW, screenH);
+
+      // Cinematic vignette
+      const vg2 = ctx.createRadialGradient(
+        screenW / 2, screenH / 2, Math.min(screenW, screenH) * 0.42,
+        screenW / 2, screenH / 2, Math.max(screenW, screenH) * 0.72
+      );
+      vg2.addColorStop(0, "rgba(0,0,0,0)");
+      vg2.addColorStop(1, "rgba(2,3,8,0.42)");
+      ctx.fillStyle = vg2;
+      ctx.fillRect(0, 0, screenW, screenH);
+
+      // --- 8d. BUSTED red flash ---
       if (bustedFlashRef.current > 0.02) {
         ctx.save();
         ctx.globalAlpha = Math.min(0.45, bustedFlashRef.current * 0.45);
