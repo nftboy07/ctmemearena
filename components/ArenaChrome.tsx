@@ -35,6 +35,7 @@ import { tokens as demoTokens } from "@/lib/demo";
 import type { Token } from "@/lib/types";
 import "./arena-chrome.css";
 import "./arena-redesign.css";
+import "./arena-gallery-polish.css";
 
 const money = (n: number) =>
   n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : n >= 1e6 ? `$${(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `$${(n / 1e3).toFixed(1)}K` : `$${n.toFixed(2)}`;
@@ -132,6 +133,19 @@ export default function ArenaChrome() {
   useEffect(() => {
     setIsMuted(sounds.isMuted());
     // First-visit tutorial now lives behind the start screen's HOW TO PLAY button
+  }, []);
+
+  // Spotlight cards: feed cursor position to each glass card for hover glow
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      document.querySelectorAll(".arena-glass-card").forEach((el) => {
+        const r = (el as HTMLElement).getBoundingClientRect();
+        (el as HTMLElement).style.setProperty("--mx", `${e.clientX - r.left}px`);
+        (el as HTMLElement).style.setProperty("--my", `${e.clientY - r.top}px`);
+      });
+    };
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
   const toggleSound = () => {
@@ -365,6 +379,13 @@ export default function ArenaChrome() {
             </button>
             <div>
               <span className="start-domain">ctarena.xyz</span>
+            </div>
+          </div>
+          <div className="start-marquee" aria-hidden="true">
+            <div className="start-marquee-track">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <span key={i}>WALK&nbsp;&nbsp;✦&nbsp;&nbsp;COLLECT&nbsp;&nbsp;✦&nbsp;&nbsp;OUTRUN&nbsp;&nbsp;✦&nbsp;&nbsp;FLEX&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
+              ))}
             </div>
           </div>
         </div>
