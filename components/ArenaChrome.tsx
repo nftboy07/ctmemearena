@@ -34,6 +34,7 @@ import { DEMO_PLAYERS } from "@/lib/demo-players";
 import { tokens as demoTokens } from "@/lib/demo";
 import type { Token } from "@/lib/types";
 import "./arena-chrome.css";
+import "./arena-redesign.css";
 
 const money = (n: number) =>
   n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : n >= 1e6 ? `$${(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `$${(n / 1e3).toFixed(1)}K` : `$${n.toFixed(2)}`;
@@ -76,6 +77,13 @@ export default function ArenaChrome() {
   // HUD visibility + collapsible right panel
   const [hudHidden, setHudHidden] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
+
+  // Cinematic entry — start screen gates the HUD reveal
+  const [hasEntered, setHasEntered] = useState(false);
+  const enterArena = useCallback(() => {
+    sounds.playDistrictSwoosh();
+    setHasEntered(true);
+  }, []);
 
   // Level-up celebration overlay
   const [levelUpFlash, setLevelUpFlash] = useState<number | null>(null);
@@ -123,15 +131,7 @@ export default function ArenaChrome() {
 
   useEffect(() => {
     setIsMuted(sounds.isMuted());
-    // Show tutorial on first visit
-    try {
-      const hasSeen = localStorage.getItem('ct-arena-tutorial-seen');
-      if (!hasSeen) {
-        // Small delay so the world loads first
-        const t = setTimeout(() => setShowHelpModal(true), 800);
-        return () => clearTimeout(t);
-      }
-    } catch {}
+    // First-visit tutorial now lives behind the start screen's HOW TO PLAY button
   }, []);
 
   const toggleSound = () => {
@@ -310,7 +310,7 @@ export default function ArenaChrome() {
   ];
 
   return (
-    <main className={`arena-root-viewport ${hudHidden ? "hud-hidden" : ""}`}>
+    <main className={`arena-root-viewport ${hudHidden ? "hud-hidden" : ""} ${!hasEntered ? "pre-entry" : ""}`}>
       {/* 1. Full-Screen Interactive Game Canvas (Little Kerala 3D Promenade) */}
       <CTWorldCanvas
         joystickVector={joystickVector}
@@ -323,6 +323,52 @@ export default function ArenaChrome() {
         jumpDistrictId={jumpDistrictId}
         onResetJump={() => setJumpDistrictId(null)}
       />
+
+      {/* Cinematic start screen — the arena lives behind it */}
+      {!hasEntered && (
+        <div className="arena-start-screen">
+          <div className="start-orb o1" />
+          <div className="start-orb o2" />
+          <div className="start-orb o3" />
+          <div className="start-floaties">
+            <span>🪙</span><span>💎</span><span>🪙</span><span>💰</span><span>💎</span><span>🪙</span>
+          </div>
+          <div className="start-inner">
+            <div className="start-live-pill">
+              <span className="live-dot" />
+              <span>SEASON 01 · LIVE</span>
+            </div>
+            <h1 className="start-title">CT ARENA</h1>
+            <p className="start-tagline">
+              The living world of Crypto Twitter. <b>Walk over anything with a number</b> to
+              claim it — chain pickups for <b>5x combos</b>, but don't let the <b>SEC</b> catch you at 5 stars.
+            </p>
+            <div className="start-features">
+              <div className="start-feature">
+                <span className="sf-emoji">💎</span>
+                <div><b>COLLECT</b><small>SOL · diamonds · whale bags</small></div>
+              </div>
+              <div className="start-feature">
+                <span className="sf-emoji">🚨</span>
+                <div><b>OUTRUN</b><small>Dodge SEC agents at high heat</small></div>
+              </div>
+              <div className="start-feature">
+                <span className="sf-emoji">🏆</span>
+                <div><b>FLEX</b><small>Climb the Fame Board</small></div>
+              </div>
+            </div>
+            <button className="start-enter-btn" onClick={enterArena}>
+              ENTER THE ARENA
+            </button>
+            <button className="start-how-btn" onClick={() => setShowHelpModal(true)}>
+              HOW TO PLAY
+            </button>
+            <div>
+              <span className="start-domain">ctarena.xyz</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Combo badge — chained pickups multiply XP */}
       {combo >= 2 && !hudHidden && (
@@ -1031,7 +1077,7 @@ export default function ArenaChrome() {
               <div className="help-box">
                 <h4>🕹️ MOVEMENT</h4>
                 <p>
-                  <b>PC:</b> Use <code>W, A, S, D</code> or <code>Arrow Keys</code>. Click anywhere on the promenade to walk. Hold <code>SHIFT</code> to sprint (drains stamina).
+                  <b>PC:</b> Use <code>W, A, S, D</code> or <code>Arrow Keys</code>. Click anywhere on the promenade to walk. <b>Drag to look around.</b> Hold <code>SHIFT</code> to sprint (drains stamina).
                   <br />
                   <b>Mobile:</b> Drag the virtual analog joystick on the bottom-left. Tap <code>SPRINT</code> for turbo speed!
                   <br />
