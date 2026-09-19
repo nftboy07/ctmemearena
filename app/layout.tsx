@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Outfit, Unbounded } from "next/font/google";
 import "./globals.css";
 import "./arena-polish.css";
 import Providers from "./providers";
 
 const freshFont = Outfit({ weight: ["400", "500", "600", "700", "800"], subsets: ["latin"], variable: "--font-body" });
-const displayFont = freshFont;
+const noirDisplay = Unbounded({ weight: ["500", "700", "800", "900"], subsets: ["latin"], variable: "--font-display" });
+const displayFont = noirDisplay;
 const bodyFont = freshFont;
 
 export const metadata: Metadata = {

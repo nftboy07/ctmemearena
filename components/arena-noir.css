@@ -1,0 +1,239 @@
+
+/* ============================================================
+   GOLDEN NOIR — CT Arena Season 02 identity.
+   Deep charcoal blacks, rich gold, bone white. Unbounded display
+   type. One confident accent. Nothing shouts; everything glows.
+   ============================================================ */
+
+.arena-root-viewport {
+  --noir-gold: #f0b90a;
+  --noir-gold-soft: #f5c451;
+  --noir-gold-dim: rgba(240, 185, 10, 0.14);
+  --noir-ink: #060809;
+  --noir-bone: #f5f1e6;
+  --noir-dim: rgba(245, 241, 230, 0.6);
+
+  /* reskin the cinematic HUD: lime -> gold */
+  --cine-lime: #f0b90a;
+  --cine-glass: rgba(6, 8, 9, 0.62);
+  --cine-glass-soft: rgba(6, 8, 9, 0.5);
+  --cine-line: rgba(240, 185, 10, 0.16);
+  --cine-text: #f5f1e6;
+  --cine-dim: rgba(245, 241, 230, 0.6);
+  --cine-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.arena-root-viewport .cine-ring-fg { stroke: var(--noir-gold); }
+.arena-root-viewport .cine-level {
+  background: var(--noir-gold);
+  color: #060809;
+}
+.arena-root-viewport .cine-sol { color: var(--noir-gold-soft); }
+.arena-root-viewport .cine-dock .hud-btn.active::after { background: var(--noir-gold); }
+.arena-root-viewport .arena-right-stack .quest-progress-bar { background: var(--noir-gold) !important; }
+.arena-root-viewport .arena-right-stack .quest-xp-reward {
+  background: var(--noir-gold-dim) !important;
+  color: var(--noir-gold-soft) !important;
+}
+.arena-root-viewport .arena-right-stack .live-pill .live-dot {
+  background: var(--noir-gold);
+  box-shadow: 0 0 8px rgba(240, 185, 10, 0.8);
+}
+.arena-root-viewport .marquee-badge {
+  background: var(--noir-gold-dim);
+  color: var(--noir-gold-soft);
+}
+
+/* ============ START SCREEN ============ */
+.arena-root-viewport .noir-start-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: url("/arena_promenade.jpg") center 30% / cover no-repeat, #060809;
+  overflow-y: auto;
+}
+.arena-root-viewport .noir-start-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(4, 5, 6, 0.96) 0%, rgba(4, 5, 6, 0.55) 42%, rgba(4, 5, 6, 0.15) 70%, rgba(4, 5, 6, 0.35) 100%),
+    radial-gradient(120% 60% at 50% 110%, rgba(240, 185, 10, 0.14), transparent 60%);
+}
+.arena-root-viewport .noir-start-inner {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  padding: 40px 28px 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.arena-root-viewport .noir-brand-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 34px;
+}
+.arena-root-viewport .noir-logo {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  color: var(--noir-bone);
+}
+.arena-root-viewport .noir-logo em {
+  font-style: normal;
+  color: var(--noir-gold);
+  margin-left: 6px;
+}
+.arena-root-viewport .noir-live-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--noir-dim);
+  border: 1px solid rgba(245, 241, 230, 0.16);
+  background: rgba(6, 8, 9, 0.55);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  padding: 8px 14px;
+  border-radius: 999px;
+}
+.arena-root-viewport .noir-live-pill .live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--noir-gold);
+  box-shadow: 0 0 10px rgba(240, 185, 10, 0.9);
+  animation: noirPulse 2s ease-in-out infinite;
+}
+@keyframes noirPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.8); }
+}
+.arena-root-viewport .noir-title {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  font-size: clamp(44px, 11vw, 76px);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  color: var(--noir-bone);
+  margin: 0 0 18px;
+  text-wrap: balance;
+}
+.arena-root-viewport .noir-title span {
+  background: linear-gradient(100deg, #f7d774 10%, #f0b90a 45%, #b97e0a 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.arena-root-viewport .noir-tagline {
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: var(--noir-dim);
+  margin: 0 0 26px;
+  max-width: 440px;
+}
+.arena-root-viewport .noir-tagline b { color: var(--noir-bone); font-weight: 700; }
+.arena-root-viewport .noir-stats {
+  display: flex;
+  gap: 34px;
+  margin-bottom: 30px;
+}
+.arena-root-viewport .noir-stat { display: flex; flex-direction: column; gap: 3px; }
+.arena-root-viewport .noir-stat b {
+  font-family: var(--font-display), sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--noir-gold-soft);
+}
+.arena-root-viewport .noir-stat small {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--noir-dim);
+}
+.arena-root-viewport .noir-enter-btn {
+  width: 100%;
+  max-width: 380px;
+  padding: 17px 24px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(100deg, #f7d774, #f0b90a 60%, #d99e06);
+  color: #060809;
+  font-size: 16.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 12px 40px rgba(240, 185, 10, 0.35);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  margin-bottom: 12px;
+}
+.arena-root-viewport .noir-enter-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 16px 48px rgba(240, 185, 10, 0.45);
+}
+.arena-root-viewport .noir-enter-btn:active { transform: translateY(0) scale(0.98); }
+.arena-root-viewport .noir-how-btn {
+  background: transparent;
+  border: none;
+  color: var(--noir-dim);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  padding: 8px 16px;
+  margin-bottom: 26px;
+  transition: color 0.15s ease;
+}
+.arena-root-viewport .noir-how-btn:hover { color: var(--noir-bone); }
+.arena-root-viewport .noir-domain {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(245, 241, 230, 0.32);
+}
+
+/* hide legacy fresh start-screen styles if they ever match */
+.arena-root-viewport .arena-start-screen { display: none !important; }
+
+/* left sidebar is redundant with the dock — hide for the clean noir look */
+.arena-root-viewport .arena-left-sidebar { display: none !important; }
+
+/* ============ MODALS / CARDS: noir pass ============ */
+.arena-root-viewport .arena-modal-card,
+.arena-root-viewport .modal-card {
+  background: rgba(8, 10, 12, 0.92) !important;
+  border: 1px solid rgba(240, 185, 10, 0.16) !important;
+  border-radius: 22px !important;
+  color: var(--noir-bone) !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6) !important;
+}
+.arena-root-viewport .modal-title { color: var(--noir-bone) !important; }
+.arena-root-viewport .modal-subtitle { color: var(--noir-dim) !important; }
+
+/* gold primary buttons wherever the fresh system painted green */
+.arena-root-viewport .fresh-btn-primary,
+.arena-root-viewport .start-enter-btn {
+  background: linear-gradient(100deg, #f7d774, #f0b90a 60%, #d99e06) !important;
+  color: #060809 !important;
+  box-shadow: 0 12px 40px rgba(240, 185, 10, 0.35) !important;
+}
+
+/* mobile */
+@media (max-width: 720px) {
+  .arena-root-viewport .noir-start-screen { align-items: flex-end; }
+  .arena-root-viewport .noir-start-inner { padding: 32px 22px 38px; }
+  .arena-root-viewport .noir-stats { gap: 26px; }
+}

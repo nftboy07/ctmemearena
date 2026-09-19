@@ -36,6 +36,7 @@ import type { Token } from "@/lib/types";
 import "./arena-chrome.css";
 import "./arena-redesign.css";
 import "./arena-cinematic.css";
+import "./arena-noir.css";
 import "./arena-gallery-polish.css";
 
 const money = (n: number) =>
@@ -337,42 +338,39 @@ export default function ArenaChrome() {
         onResetJump={() => setJumpDistrictId(null)}
       />
 
-      {/* Cinematic start screen — the arena lives behind it */}
+      {/* Golden-noir start screen */}
       {!hasEntered && (
-        <div className="arena-start-screen">
-          <div className="start-inner">
-            <div className="start-live-pill">
-              <span className="live-dot" />
-              <span>SEASON 01 · LIVE</span>
+        <div className="noir-start-screen">
+          <div className="noir-start-veil" />
+          <div className="noir-start-inner">
+            <div className="noir-brand-row">
+              <div className="noir-logo">CT<em>ARENA</em></div>
+              <div className="noir-live-pill">
+                <span className="live-dot" />
+                <span>SEASON 01 · LIVE</span>
+              </div>
             </div>
-            <h1 className="start-title">CT Arena</h1>
-            <p className="start-tagline">
-              The living world of Crypto Twitter. Walk over anything with a number
-              to claim it — chain pickups for <b>5x combos</b>, and don't let the <b>SEC</b> catch you.
+            <h1 className="noir-title">
+              OWN THE<br />
+              <span>NIGHT MARKET</span>
+            </h1>
+            <p className="noir-tagline">
+              The living world of Crypto Twitter — after dark. Walk over anything
+              with a number to claim it, chain pickups for <b>5x combos</b>, and don't
+              let the <b>SEC</b> catch you.
             </p>
-            <div className="start-features">
-              <div className="start-feature">
-                <span className="sf-emoji">💎</span>
-                <div><b>Collect</b><small>SOL · diamonds · whale bags</small></div>
-              </div>
-              <div className="start-feature">
-                <span className="sf-emoji">🚨</span>
-                <div><b>Outrun</b><small>Dodge SEC agents at high heat</small></div>
-              </div>
-              <div className="start-feature">
-                <span className="sf-emoji">🏆</span>
-                <div><b>Flex</b><small>Climb the Fame Board</small></div>
-              </div>
+            <div className="noir-stats">
+              <div className="noir-stat"><b>1,247</b><small>in the arena</small></div>
+              <div className="noir-stat"><b>48.2K</b><small>SOL claimed</small></div>
+              <div className="noir-stat"><b>5x</b><small>max combo</small></div>
             </div>
-            <button className="start-enter-btn" onClick={enterArena}>
+            <button className="noir-enter-btn" onClick={enterArena}>
               Enter the arena
             </button>
-            <button className="start-how-btn" onClick={() => setShowHelpModal(true)}>
+            <button className="noir-how-btn" onClick={() => setShowHelpModal(true)}>
               How to play
             </button>
-            <div>
-              <span className="start-domain">ctarena.xyz</span>
-            </div>
+            <div className="noir-domain">ctarena.xyz</div>
           </div>
         </div>
       )}
@@ -423,7 +421,7 @@ export default function ArenaChrome() {
             />
           </svg>
           <img
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
+            src="/sprites/hud_avatar.png"
             alt="Player"
           />
           <span className="cine-level">{playerLevel}</span>
