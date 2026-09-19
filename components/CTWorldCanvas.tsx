@@ -282,6 +282,12 @@ export default function CTWorldCanvas({
   // Target Move State
   const targetPosRef = useRef<{ x: number; y: number } | null>(null);
 
+  // Drag-to-look camera (Little Kerala style): drag peeks around, springs back
+  const lookRef = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
+  const dragRef = useRef({ active: false, startX: 0, startY: 0, moved: false, id: -1 });
+  const leadRef = useRef({ x: 0, y: 0 });
+  const camRef = useRef({ x: 0, y: 0 });
+
   // Spawn Collectibles around the arena
   const spawnCollectibles = useCallback(() => {
     const items: Collectible[] = [
@@ -585,28 +591,24 @@ export default function CTWorldCanvas({
     let animId = 0;
     let lastTime = performance.now();
 
-    // Click to move or inspect
-    const handleCanvasClick = (e: MouseEvent) => {
+    // Little Kerala style input: tap = inspect trader / move there, drag = look around
+    const getScreenPos = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
-      const clickScreenX = e.clientX - rect.left;
-      const clickScreenY = e.clientY - rect.top;
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
 
+    const handleTap = (screenX: number, screenY: number) => {
       const w = canvas.width;
       const h = canvas.height;
       const aspect = 16 / 9;
       const worldW = Math.max(w, h * aspect);
       const worldH = Math.max(h, worldW / aspect);
+      const cam = camRef.current;
 
-      const p = playerRef.current;
-      const cam = {
-        x: p.x * worldW - w / 2,
-        y: p.y * worldH - h / 2,
-      };
+      const worldClickX = (screenX + cam.x) / worldW;
+      const worldClickY = (screenY + cam.y) / worldH;
 
-      const worldClickX = (clickScreenX + cam.x) / worldW;
-      const worldClickY = (clickScreenY + cam.y) / worldH;
-
-      // Check if user clicked on any trader to inspect
+      // Check if user tapped on any trader to inspect
       let clickedTrader: WanderingTrader | null = null;
       tradersRef.current.forEach((t) => {
         const dx = (t.x - worldClickX) * worldW;
@@ -627,7 +629,7 @@ export default function CTWorldCanvas({
           });
         }
       } else {
-        // Move player to clicked location
+        // Move player to tapped location
         sounds.playStep();
         targetPosRef.current = {
           x: Math.max(0.08, Math.min(0.92, worldClickX)),
@@ -636,7 +638,48 @@ export default function CTWorldCanvas({
       }
     };
 
-    canvas.addEventListener("click", handleCanvasClick);
+    const onPointerDown = (e: PointerEvent) => {
+      const pos = getScreenPos(e);
+      dragRef.current = { active: true, startX: pos.x, startY: pos.y, moved: false, id: e.pointerId };
+      try {
+        canvas.setPointerCapture(e.pointerId);
+      } catch {}
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      const d = dragRef.current;
+      if (!d.active || e.pointerId !== d.id) return;
+      const pos = getScreenPos(e);
+      const dx = pos.x - d.startX;
+      const dy = pos.y - d.startY;
+      if (!d.moved && Math.hypot(dx, dy) > 10) d.moved = true;
+      if (d.moved) {
+        // Drag to look — peek toward the drag direction, clamped
+        const rect = canvas.getBoundingClientRect();
+        const maxX = rect.width * 0.18;
+        const maxY = rect.height * 0.18;
+        lookRef.current.tx = Math.max(-maxX, Math.min(maxX, dx * 0.9));
+        lookRef.current.ty = Math.max(-maxY, Math.min(maxY, dy * 0.9));
+      }
+    };
+
+    const endDrag = (e: PointerEvent) => {
+      const d = dragRef.current;
+      if (!d.active || e.pointerId !== d.id) return;
+      d.active = false;
+      // Spring the camera back to the player
+      lookRef.current.tx = 0;
+      lookRef.current.ty = 0;
+      if (!d.moved) {
+        const pos = getScreenPos(e);
+        handleTap(pos.x, pos.y);
+      }
+    };
+
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerup", endDrag);
+    canvas.addEventListener("pointercancel", endDrag);
 
     // Responsive Canvas Resizing
     const resizeCanvas = () => {
@@ -921,6 +964,18 @@ export default function CTWorldCanvas({
         shakeRef.current = 0;
       }
 
+      // Little Kerala drag-to-look: eased peek offset (fast while dragging,
+      // gentle spring-back on release) + subtle lead in movement direction
+      const lk = dragRef.current.active ? 0.35 : 0.08;
+      lookRef.current.x += (lookRef.current.tx - lookRef.current.x) * lk * dt;
+      lookRef.current.y += (lookRef.current.ty - lookRef.current.y) * lk * dt;
+      const leadAmt = p.isMoving ? 26 : 0;
+      leadRef.current.x += (Math.cos(p.facing) * leadAmt - leadRef.current.x) * 0.06 * dt;
+      leadRef.current.y += (Math.sin(p.facing) * leadAmt - leadRef.current.y) * 0.06 * dt;
+      cam.x += lookRef.current.x + leadRef.current.x;
+      cam.y += lookRef.current.y + leadRef.current.y;
+      camRef.current = cam;
+
       ctx.clearRect(0, 0, screenW, screenH);
 
       // --- 4. RENDER CLEAN PROMENADE BACKGROUND ---
@@ -1027,6 +1082,12 @@ export default function CTWorldCanvas({
         ctx.textBaseline = "middle";
         ctx.fillStyle = col.color;
         ctx.fillText(col.symbol, colScreenX, drawY);
+
+        // Little Kerala style: every pickup wears its number
+        ctx.font = "800 10px Inter, sans-serif";
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.fillText(`+${col.xp}`, colScreenX, drawY + 24);
         ctx.restore();
 
         remainingCollectibles.push(col);
@@ -1245,7 +1306,10 @@ export default function CTWorldCanvas({
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", resizeCanvas);
-      canvas.removeEventListener("click", handleCanvasClick);
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerup", endDrag);
+      canvas.removeEventListener("pointercancel", endDrag);
     };
   }, [joystickVector, isSprinting, onInspectTrader, onCollectXP, onUpdateCoords, onHeatChange, onBusted, spawnCollectibles, drawPhotorealisticHuman]);
 
