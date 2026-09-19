@@ -190,6 +190,17 @@ export default function ArenaChrome() {
         setShowModal((m) => (m === "MAP" ? null : "MAP"));
       } else if (k === "q") {
         setShowModal((m) => (m === "QUESTS" ? null : "QUESTS"));
+      } else if (k >= "1" && k <= "6") {
+        // Pixels-style hotbar shortcuts
+        const actions = [
+          () => { setActiveNav("EXPLORE"); sounds.playCoin(); },
+          () => { sounds.playDistrictSwoosh(); setShowModal("MAP"); },
+          () => setShowModal("TRADE"),
+          () => setShowModal("QUESTS"),
+          () => setShowModal("LEADERBOARD"),
+          () => setShowHelpModal(true),
+        ];
+        actions[parseInt(k, 10) - 1]?.();
       } else if (k === "escape") {
         setShowModal(null);
         setSelectedTrader(null);
@@ -400,10 +411,21 @@ export default function ArenaChrome() {
 
       {/* 2. Top-Left Logo & Subtitle */}
       <div className="arena-top-left">
-        <div className="arena-title-row">
-          <h1>CT ARENA</h1>
+        <div className="px-player-chip" onClick={() => setShowModal("PROFILE")} title="Open profile">
+          <div className="px-avatar">
+            <img
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
+              alt="Player"
+            />
+            <span className="px-level">{playerLevel}</span>
+          </div>
+          <div className="px-meta">
+            <span className="px-name">YOU</span>
+            <div className="px-xp-track">
+              <div className="px-xp-fill" style={{ width: `${(playerXP / 5000) * 100}%` }} />
+            </div>
+          </div>
         </div>
-        <div className="arena-subtitle">THE LIVING WORLD OF CRYPTO TWITTER</div>
       </div>
 
       {/* 3. Top-Right Profile & Wallet Bar */}
@@ -560,6 +582,25 @@ export default function ArenaChrome() {
         </div>
       </div>
 
+      {/* 6b. CT Feed — Pixels-style activity panel, bottom-left */}
+      {!hudHidden && (
+        <div className="ct-feed">
+          <div className="ct-feed-head">
+            <span className="live-dot" />
+            <span>CT FEED</span>
+          </div>
+          <div className="ct-feed-list">
+            {toasts.length === 0 ? (
+              <div className="ct-feed-item dim">Walk over pickups to make the feed…</div>
+            ) : (
+              toasts.slice(-4).reverse().map((t) => (
+                <div className="ct-feed-item" key={t.id}>{t.msg}</div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
       {/* 7. Bottom-Center Player HUD / Action Bar (Matching Screenshot) */}
       <div className="arena-player-hud-bar">
         {/* Left Profile Capsule */}
@@ -595,7 +636,7 @@ export default function ArenaChrome() {
             }}
           >
             <Compass size={18} />
-            <span>Explore</span>
+            <span className="hotbar-key">1</span><span>Explore</span>
           </button>
           <button
             className={`hud-btn ${activeNav === "MAP" ? "active" : ""}`}
@@ -605,35 +646,35 @@ export default function ArenaChrome() {
             }}
           >
             <MapIcon size={18} />
-            <span>Map</span>
+            <span className="hotbar-key">2</span><span>Map</span>
           </button>
           <button
             className={`hud-btn ${activeNav === "TRADE" ? "active" : ""}`}
             onClick={() => setShowModal("TRADE")}
           >
             <ArrowLeftRight size={18} />
-            <span>Trade</span>
+            <span className="hotbar-key">3</span><span>Trade</span>
           </button>
           <button
             className={`hud-btn ${activeNav === "QUESTS" ? "active" : ""}`}
             onClick={() => setShowModal("QUESTS")}
           >
             <Flag size={18} />
-            <span>Quests</span>
+            <span className="hotbar-key">4</span><span>Quests</span>
           </button>
           <button
             className={`hud-btn ${activeNav === "TRADERS" ? "active" : ""}`}
             onClick={() => setShowModal("LEADERBOARD")}
           >
             <Users size={18} />
-            <span>Social</span>
+            <span className="hotbar-key">5</span><span>Social</span>
           </button>
           <button
             className="hud-btn"
             onClick={() => setShowHelpModal(true)}
           >
             <MoreHorizontal size={18} />
-            <span>More</span>
+            <span className="hotbar-key">6</span><span>More</span>
           </button>
         </div>
       </div>
