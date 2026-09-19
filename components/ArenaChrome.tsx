@@ -73,11 +73,27 @@ export default function ArenaChrome() {
 
   useEffect(() => {
     setIsMuted(sounds.isMuted());
+    // Show tutorial on first visit
+    try {
+      const hasSeen = localStorage.getItem('ct-arena-tutorial-seen');
+      if (!hasSeen) {
+        // Small delay so the world loads first
+        const t = setTimeout(() => setShowHelpModal(true), 800);
+        return () => clearTimeout(t);
+      }
+    } catch {}
   }, []);
 
   const toggleSound = () => {
     const next = sounds.toggleMute();
     setIsMuted(next);
+  };
+
+  const closeHelpModal = () => {
+    setShowHelpModal(false);
+    try {
+      localStorage.setItem('ct-arena-tutorial-seen', '1');
+    } catch {}
   };
 
   const showToast = (msg: string) => {
@@ -119,7 +135,17 @@ export default function ArenaChrome() {
     setIsFollowing(!isFollowing);
     sounds.playCoin();
     if (!isFollowing) {
-      setQuestProgress((p) => Math.min(5, p + 1));
+      setQuestProgress((p) => {
+        const next = Math.min(5, p + 1);
+        if (next === 5 && p < 5) {
+          // Quest completed!
+          setTimeout(() => {
+            sounds.playDiamond();
+            showToast("🏆 QUEST COMPLETE! +500 XP - You're rising to legend!");
+          }, 500);
+        }
+        return next;
+      });
       showToast(`Followed ${selectedTrader.handle} on X! (+100 XP)`);
       handleCollectXP(100, "diamond");
     } else {
@@ -804,9 +830,9 @@ export default function ArenaChrome() {
 
       {/* Help Modal */}
       {showHelpModal && (
-        <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && setShowHelpModal(false)}>
+        <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && closeHelpModal()}>
           <div className="help-modal-card">
-            <button className="sheet-close-btn" onClick={() => setShowHelpModal(false)}>
+            <button className="sheet-close-btn" onClick={closeHelpModal}>
               <X size={18} />
             </button>
             <div className="sheet-title-row">
@@ -842,7 +868,7 @@ export default function ArenaChrome() {
               </div>
             </div>
 
-            <button className="help-play-btn" onClick={() => setShowHelpModal(false)}>
+            <button className="help-play-btn" onClick={closeHelpModal}>
               LET'S PLAY!
             </button>
           </div>
