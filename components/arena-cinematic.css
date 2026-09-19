@@ -1,0 +1,341 @@
+
+/* ============================================================
+   CINEMATIC HUD — GTA-style minimal overlay.
+   Frosted glass, hairline borders, soft shadows.
+   The game world stays the hero; chrome stays quiet.
+   ============================================================ */
+
+.arena-root-viewport {
+  --cine-glass: rgba(8, 12, 20, 0.55);
+  --cine-glass-soft: rgba(8, 12, 20, 0.42);
+  --cine-line: rgba(255, 255, 255, 0.13);
+  --cine-text: #f4f6fa;
+  --cine-dim: rgba(244, 246, 250, 0.62);
+  --cine-lime: #a3e635;
+  --cine-amber: #fbbf24;
+  --cine-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+}
+
+/* ---------- Top-left: avatar + XP ring ---------- */
+.arena-root-viewport .cine-avatar {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+.arena-root-viewport .cine-avatar img {
+  position: absolute;
+  inset: 6px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+.arena-root-viewport .cine-ring {
+  position: absolute;
+  inset: 0;
+  width: 56px;
+  height: 56px;
+}
+.arena-root-viewport .cine-ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 3;
+}
+.arena-root-viewport .cine-ring-fg {
+  fill: none;
+  stroke: var(--cine-lime);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s ease;
+}
+.arena-root-viewport .cine-level {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--cine-lime);
+  color: #0a0f05;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(8, 12, 20, 0.9);
+}
+
+/* ---------- Top-right: wallet + icon buttons ---------- */
+.arena-root-viewport .arena-top-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.arena-root-viewport .cine-wallet {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--cine-glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--cine-line);
+  border-radius: 999px;
+  padding: 9px 15px;
+  color: var(--cine-text);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: var(--cine-shadow);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.arena-root-viewport .cine-wallet:hover { background: rgba(8, 12, 20, 0.68); }
+.arena-root-viewport .cine-wallet:active { transform: scale(0.96); }
+.arena-root-viewport .cine-sol {
+  color: var(--cine-amber);
+  font-size: 15px;
+  font-weight: 800;
+}
+.arena-root-viewport .cine-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cine-glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--cine-line);
+  color: var(--cine-text);
+  box-shadow: var(--cine-shadow);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.arena-root-viewport .cine-icon-btn:hover { background: rgba(8, 12, 20, 0.68); }
+.arena-root-viewport .cine-icon-btn:active { transform: scale(0.92); }
+
+/* ---------- Bottom-center icon dock (desktop) ---------- */
+.arena-root-viewport .cine-dock {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 64px;
+  background: var(--cine-glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--cine-line);
+  border-radius: 999px;
+  box-shadow: var(--cine-shadow);
+  padding: 7px 10px;
+  z-index: 30;
+}
+.arena-root-viewport .cine-dock .hud-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.arena-root-viewport .cine-dock .hud-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--cine-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease;
+}
+.arena-root-viewport .cine-dock .hud-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--cine-text);
+}
+.arena-root-viewport .cine-dock .hud-btn:active { transform: scale(0.9); }
+.arena-root-viewport .cine-dock .hud-btn.active { color: var(--cine-text); }
+.arena-root-viewport .cine-dock .hud-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--cine-lime);
+}
+
+/* ---------- Right stack: slim frosted cards ---------- */
+.arena-root-viewport .arena-right-stack .arena-glass-card {
+  background: var(--cine-glass-soft) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--cine-line) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--cine-shadow) !important;
+  color: var(--cine-text) !important;
+}
+.arena-root-viewport .arena-right-stack .event-title,
+.arena-root-viewport .arena-right-stack .season-headline {
+  color: var(--cine-text) !important;
+}
+.arena-root-viewport .arena-right-stack .arena-subtitle,
+.arena-root-viewport .arena-right-stack .event-sub,
+.arena-root-viewport .arena-right-stack .event-time,
+.arena-root-viewport .arena-right-stack .season-sub {
+  color: var(--cine-dim) !important;
+}
+.arena-root-viewport .arena-right-stack .event-item-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+.arena-root-viewport .arena-right-stack .event-icon,
+.arena-root-viewport .arena-right-stack .season-trophy-icon {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+.arena-root-viewport .arena-right-stack .quest-progress-track {
+  background: rgba(255, 255, 255, 0.12) !important;
+  height: 6px;
+  border-radius: 999px;
+}
+.arena-root-viewport .arena-right-stack .quest-progress-bar {
+  background: var(--cine-lime) !important;
+  border-radius: 999px;
+}
+.arena-root-viewport .arena-right-stack .quest-xp-reward {
+  background: rgba(163, 230, 53, 0.14) !important;
+  color: #d9f99d !important;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.arena-root-viewport .arena-right-stack .live-pill {
+  background: transparent;
+  border: none;
+  color: var(--cine-dim);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 0;
+}
+.arena-root-viewport .arena-right-stack .live-pill .live-dot {
+  background: var(--cine-lime);
+  box-shadow: 0 0 8px rgba(163, 230, 53, 0.8);
+}
+.arena-root-viewport .arena-right-stack .quest-count {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--cine-text);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+/* ---------- Floating toasts ---------- */
+.arena-root-viewport .arena-toast-stack {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 128px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 40;
+  pointer-events: none;
+}
+.arena-root-viewport .arena-toast-pill {
+  background: var(--cine-glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--cine-line);
+  border-radius: 999px;
+  color: var(--cine-text);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  box-shadow: var(--cine-shadow);
+  white-space: nowrap;
+  max-width: 82vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: cineToastIn 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+@keyframes cineToastIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------- Combo + wanted: quiet top-center ---------- */
+.arena-root-viewport .arena-combo-badge,
+.arena-root-viewport .arena-wanted-badge {
+  background: var(--cine-glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--cine-line);
+  border-radius: 999px;
+  box-shadow: var(--cine-shadow);
+  color: var(--cine-text);
+  font-weight: 700;
+}
+
+/* ---------- Radar: refined ---------- */
+.arena-root-viewport .arena-radar-minimap {
+  background: var(--cine-glass-soft);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--cine-line);
+  box-shadow: var(--cine-shadow);
+}
+.arena-root-viewport .radar-coords-pill {
+  background: var(--cine-glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--cine-line);
+  border-radius: 999px;
+  color: var(--cine-dim);
+  box-shadow: var(--cine-shadow);
+}
+.arena-root-viewport .radar-coords-pill b { color: var(--cine-text); }
+
+/* ---------- Market ticker: quieter ---------- */
+.arena-root-viewport .arena-bottom-marquee {
+  background: rgba(5, 8, 14, 0.72);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.arena-root-viewport .marquee-badge {
+  background: rgba(163, 230, 53, 0.15);
+  color: #d9f99d;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+/* ---------- Touch cluster: match the system ---------- */
+.arena-root-viewport .arena-mobile-touch-cluster .touch-btn {
+  box-shadow: var(--cine-shadow) !important;
+}
+.arena-root-viewport .mobile-joystick-container {
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.4));
+}
+
+/* ---------- Mobile tuning ---------- */
+@media (max-width: 720px) {
+  .arena-root-viewport .cine-dock { display: none; }
+  .arena-root-viewport .cine-avatar { width: 48px; height: 48px; }
+  .arena-root-viewport .cine-avatar img { inset: 5px; width: 38px; height: 38px; }
+  .arena-root-viewport .cine-ring { width: 48px; height: 48px; }
+  .arena-root-viewport .cine-wallet { padding: 8px 13px; font-size: 12.5px; }
+  .arena-root-viewport .cine-icon-btn { width: 36px; height: 36px; }
+  .arena-root-viewport .arena-toast-stack { bottom: 170px; }
+}
