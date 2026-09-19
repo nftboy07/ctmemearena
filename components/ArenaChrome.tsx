@@ -35,6 +35,7 @@ import { tokens as demoTokens } from "@/lib/demo";
 import type { Token } from "@/lib/types";
 import "./arena-chrome.css";
 import "./arena-redesign.css";
+import "./arena-cinematic.css";
 import "./arena-gallery-polish.css";
 
 const money = (n: number) =>
@@ -411,63 +412,49 @@ export default function ArenaChrome() {
 
       {/* 2. Top-Left Logo & Subtitle */}
       <div className="arena-top-left">
-        <div className="px-player-chip" onClick={() => setShowModal("PROFILE")} title="Open profile">
-          <div className="px-avatar">
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
-              alt="Player"
+        <button className="cine-avatar" onClick={() => setShowModal("PROFILE")} title="Profile">
+          <svg className="cine-ring" viewBox="0 0 56 56" aria-hidden="true">
+            <circle cx="28" cy="28" r="24" className="cine-ring-bg" />
+            <circle
+              cx="28" cy="28" r="24" className="cine-ring-fg"
+              strokeDasharray={2 * Math.PI * 24}
+              strokeDashoffset={2 * Math.PI * 24 * (1 - Math.min(playerXP / 5000, 1))}
+              transform="rotate(-90 28 28)"
             />
-            <span className="px-level">{playerLevel}</span>
-          </div>
-          <div className="px-meta">
-            <span className="px-name">YOU</span>
-            <div className="px-xp-track">
-              <div className="px-xp-fill" style={{ width: `${(playerXP / 5000) * 100}%` }} />
-            </div>
-          </div>
-        </div>
+          </svg>
+          <img
+            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
+            alt="Player"
+          />
+          <span className="cine-level">{playerLevel}</span>
+        </button>
       </div>
 
       {/* 3. Top-Right Profile & Wallet Bar */}
       <header className="arena-top-right">
-        {/* Profile Avatar Pill */}
-        <div className="top-profile-pill" onClick={() => setShowModal("PROFILE")}>
-          <div className="top-avatar">
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
-              alt="Player"
-            />
-            <span className="top-level-dot">12</span>
-          </div>
-        </div>
-
-        {/* Wallet Pill */}
-        <div
-          className="top-wallet-pill"
+        <button
+          className="cine-wallet"
           onClick={() => {
             navigator.clipboard?.writeText("0xA7F84dE39B2Ce104f9812A84E1");
             sounds.playCoin();
             showToast("Wallet address copied to clipboard!");
           }}
-          title="Click to copy wallet address"
+          title="Tap to copy wallet address"
         >
-          <span className="wallet-addr">0xA7F…3B2C</span>
-          <span className="wallet-icon-coin">◎</span>
-          <span className="wallet-balance">12.45 SOL</span>
-        </div>
-
-        {/* Sound Toggle */}
-        <button className="top-icon-btn" onClick={toggleSound} title={isMuted ? "Unmute Sound" : "Mute Sound"}>
-          {isMuted ? <VolumeX size={17} /> : <Volume2 size={17} />}
+          <span className="cine-sol">◎</span>
+          <span>12.45</span>
         </button>
 
-        {/* Hamburger Menu (Opens Mobile Drawer or Guide) */}
+        <button className="cine-icon-btn" onClick={toggleSound} title={isMuted ? "Unmute" : "Mute"}>
+          {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+        </button>
+
         <button
-          className="top-icon-btn"
+          className="cine-icon-btn"
           onClick={() => setShowMobileDrawer(true)}
-          title="Open Menu / Navigation"
+          title="Menu"
         >
-          <Menu size={18} />
+          <Menu size={16} />
         </button>
       </header>
 
@@ -582,99 +569,58 @@ export default function ArenaChrome() {
         </div>
       </div>
 
-      {/* 6b. CT Feed — Pixels-style activity panel, bottom-left */}
-      {!hudHidden && (
-        <div className="ct-feed">
-          <div className="ct-feed-head">
-            <span className="live-dot" />
-            <span>CT FEED</span>
-          </div>
-          <div className="ct-feed-list">
-            {toasts.length === 0 ? (
-              <div className="ct-feed-item dim">Walk over pickups to make the feed…</div>
-            ) : (
-              toasts.slice(-4).reverse().map((t) => (
-                <div className="ct-feed-item" key={t.id}>{t.msg}</div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
+      {/* 6b. (removed: toasts now float minimal bottom-center) */}
 
       {/* 7. Bottom-Center Player HUD / Action Bar (Matching Screenshot) */}
-      <div className="arena-player-hud-bar">
-        {/* Left Profile Capsule */}
-        <div className="hud-profile-cluster" onClick={() => setShowModal("PROFILE")}>
-          <div className="hud-avatar-circle">
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces"
-              alt="Player Avatar"
-            />
-          </div>
-          <div className="hud-xp-box">
-            <div className="hud-level-tag">Lv. {playerLevel}</div>
-            <div className="hud-xp-track">
-              <div className="hud-xp-fill" style={{ width: `${(playerXP / 5000) * 100}%` }} />
-            </div>
-            <div className="hud-xp-numbers">X: {playerXP} / 5,000 XP</div>
-            <div className="hud-stamina-track" title="Sprint stamina — hold SHIFT or SPRINT">
-              <div
-                className={`hud-stamina-fill ${stamina < 25 ? "low" : ""}`}
-                style={{ width: `${stamina}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Action Button Strip (Matching Screenshot) */}
+      <div className="arena-player-hud-bar cine-dock">
         <div className="hud-actions-group">
           <button
             className={`hud-btn ${activeNav === "EXPLORE" ? "active" : ""}`}
+            title="Explore"
             onClick={() => {
               setActiveNav("EXPLORE");
               sounds.playCoin();
             }}
           >
             <Compass size={18} />
-            <span className="hotbar-key">1</span><span>Explore</span>
           </button>
           <button
             className={`hud-btn ${activeNav === "MAP" ? "active" : ""}`}
+            title="Map"
             onClick={() => {
               sounds.playDistrictSwoosh();
               setShowModal("MAP");
             }}
           >
             <MapIcon size={18} />
-            <span className="hotbar-key">2</span><span>Map</span>
           </button>
           <button
             className={`hud-btn ${activeNav === "TRADE" ? "active" : ""}`}
+            title="Trade"
             onClick={() => setShowModal("TRADE")}
           >
             <ArrowLeftRight size={18} />
-            <span className="hotbar-key">3</span><span>Trade</span>
           </button>
           <button
             className={`hud-btn ${activeNav === "QUESTS" ? "active" : ""}`}
+            title="Quests"
             onClick={() => setShowModal("QUESTS")}
           >
             <Flag size={18} />
-            <span className="hotbar-key">4</span><span>Quests</span>
           </button>
           <button
             className={`hud-btn ${activeNav === "TRADERS" ? "active" : ""}`}
+            title="Social"
             onClick={() => setShowModal("LEADERBOARD")}
           >
             <Users size={18} />
-            <span className="hotbar-key">5</span><span>Social</span>
           </button>
           <button
             className="hud-btn"
+            title="More"
             onClick={() => setShowHelpModal(true)}
           >
             <MoreHorizontal size={18} />
-            <span className="hotbar-key">6</span><span>More</span>
           </button>
         </div>
       </div>
