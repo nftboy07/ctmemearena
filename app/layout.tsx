@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Bungee, Space_Grotesk } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 import "./arena-polish.css";
 import Providers from "./providers";
 
-const displayFont = Bungee({ weight: "400", subsets: ["latin"], variable: "--font-display" });
-const bodyFont = Space_Grotesk({ subsets: ["latin"], variable: "--font-body" });
+const freshFont = Outfit({ weight: ["400", "500", "600", "700", "800"], subsets: ["latin"], variable: "--font-body" });
+const displayFont = freshFont;
+const bodyFont = freshFont;
 
 export const metadata: Metadata = {
   title: "CT Arena — The World of Crypto Twitter",
