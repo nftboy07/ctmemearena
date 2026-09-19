@@ -1,0 +1,666 @@
+/* ============================================================
+   CT ARENA — "Neon Arcade" redesign layer
+   Loaded AFTER arena-chrome.css. Overrides + new components.
+   ============================================================ */
+
+:root {
+  --r-bg: #05060e;
+  --r-panel: rgba(10, 13, 26, 0.78);
+  --r-panel-solid: #0b0e1c;
+  --r-line: rgba(255, 255, 255, 0.09);
+  --r-neon: #a6ff5e;
+  --r-cyan: #46e6ff;
+  --r-pink: #ff2d78;
+  --r-gold: #ffd54a;
+  --r-violet: #8b5cf6;
+  --r-text: #f4f6ff;
+  --r-muted: #9aa1c7;
+  --r-radius: 18px;
+  --r-glow-neon: 0 0 24px rgba(166, 255, 94, 0.35);
+  --r-glow-cyan: 0 0 24px rgba(70, 230, 255, 0.3);
+}
+
+.arena-root-viewport {
+  font-family: var(--font-body), "Space Grotesk", system-ui, -apple-system, sans-serif;
+  color: var(--r-text);
+  background: var(--r-bg);
+}
+
+/* ---------- pre-entry: hide HUD until player enters ---------- */
+.arena-root-viewport.pre-entry .arena-top-left,
+.arena-root-viewport.pre-entry .arena-top-right,
+.arena-root-viewport.pre-entry .arena-left-sidebar,
+.arena-root-viewport.pre-entry .arena-right-stack,
+.arena-root-viewport.pre-entry .arena-right-collapse-btn,
+.arena-root-viewport.pre-entry .arena-radar-minimap,
+.arena-root-viewport.pre-entry .arena-player-hud-bar,
+.arena-root-viewport.pre-entry .arena-bottom-marquee,
+.arena-root-viewport.pre-entry .arena-mobile-touch-cluster,
+.arena-root-viewport.pre-entry .arena-hud-toggle {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(10px);
+}
+.arena-root-viewport .arena-top-left,
+.arena-root-viewport .arena-top-right,
+.arena-root-viewport .arena-left-sidebar,
+.arena-root-viewport .arena-right-stack,
+.arena-root-viewport .arena-radar-minimap,
+.arena-root-viewport .arena-player-hud-bar,
+.arena-root-viewport .arena-bottom-marquee {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* ============================================================
+   START SCREEN — cinematic entry
+   ============================================================ */
+.arena-start-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    radial-gradient(1000px 600px at 50% 110%, rgba(139, 92, 246, 0.22), transparent 65%),
+    radial-gradient(800px 500px at 85% -10%, rgba(70, 230, 255, 0.12), transparent 60%),
+    radial-gradient(700px 500px at 10% 0%, rgba(255, 45, 120, 0.1), transparent 60%),
+    linear-gradient(180deg, rgba(5, 6, 14, 0.62) 0%, rgba(5, 6, 14, 0.88) 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: startFadeIn 0.6s ease both;
+}
+@keyframes startFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.start-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.5;
+  pointer-events: none;
+  animation: orbDrift 9s ease-in-out infinite alternate;
+}
+.start-orb.o1 { width: 420px; height: 420px; left: -120px; top: -120px; background: #8b5cf6; }
+.start-orb.o2 { width: 360px; height: 360px; right: -100px; top: 20%; background: #0ea5b7; animation-delay: -3s; }
+.start-orb.o3 { width: 300px; height: 300px; left: 30%; bottom: -140px; background: #ff2d78; opacity: 0.32; animation-delay: -6s; }
+@keyframes orbDrift {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(50px, 36px) scale(1.12); }
+}
+
+.start-floaties span {
+  position: absolute;
+  bottom: -60px;
+  font-size: 26px;
+  opacity: 0;
+  animation: floatUp linear infinite;
+  filter: drop-shadow(0 0 12px rgba(255, 213, 74, 0.5));
+  pointer-events: none;
+}
+.start-floaties span:nth-child(1) { left: 8%; animation-duration: 9s; animation-delay: 0s; }
+.start-floaties span:nth-child(2) { left: 22%; animation-duration: 12s; animation-delay: -4s; font-size: 20px; }
+.start-floaties span:nth-child(3) { left: 45%; animation-duration: 10s; animation-delay: -2s; font-size: 32px; }
+.start-floaties span:nth-child(4) { left: 66%; animation-duration: 13s; animation-delay: -7s; }
+.start-floaties span:nth-child(5) { left: 82%; animation-duration: 11s; animation-delay: -5s; font-size: 22px; }
+.start-floaties span:nth-child(6) { left: 93%; animation-duration: 14s; animation-delay: -9s; }
+@keyframes floatUp {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  12% { opacity: 0.9; }
+  88% { opacity: 0.7; }
+  100% { transform: translateY(-110vh) rotate(340deg); opacity: 0; }
+}
+
+.start-inner {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 24px;
+  max-width: 720px;
+  animation: startRise 0.7s cubic-bezier(0.2, 0.9, 0.25, 1.2) both 0.15s;
+}
+@keyframes startRise { from { opacity: 0; transform: translateY(34px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+.start-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--r-neon);
+  background: rgba(166, 255, 94, 0.08);
+  border: 1px solid rgba(166, 255, 94, 0.35);
+  box-shadow: var(--r-glow-neon), inset 0 1px rgba(255, 255, 255, 0.08);
+  margin-bottom: 18px;
+}
+.start-live-pill .live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--r-neon);
+  box-shadow: 0 0 10px var(--r-neon);
+  animation: blinkDot 1.4s ease-in-out infinite;
+}
+@keyframes blinkDot { 50% { opacity: 0.35; } }
+
+.start-title {
+  font-family: var(--font-display), "Bungee", system-ui, sans-serif;
+  font-size: clamp(52px, 11vw, 118px);
+  line-height: 0.95;
+  margin: 0 0 10px;
+  letter-spacing: 0.01em;
+  background: linear-gradient(100deg, #a6ff5e 5%, #46e6ff 45%, #8b5cf6 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 34px rgba(70, 230, 255, 0.35)) drop-shadow(0 6px 30px rgba(0, 0, 0, 0.6));
+  animation: titlePulse 3.2s ease-in-out infinite;
+}
+@keyframes titlePulse {
+  0%, 100% { filter: drop-shadow(0 0 26px rgba(70, 230, 255, 0.3)) drop-shadow(0 6px 30px rgba(0,0,0,0.6)); }
+  50% { filter: drop-shadow(0 0 46px rgba(166, 255, 94, 0.45)) drop-shadow(0 6px 30px rgba(0,0,0,0.6)); }
+}
+
+.start-tagline {
+  color: var(--r-muted);
+  font-size: clamp(14px, 2.4vw, 18px);
+  font-weight: 500;
+  margin: 0 auto 26px;
+  max-width: 520px;
+  line-height: 1.55;
+}
+.start-tagline b { color: var(--r-text); }
+
+.start-features {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+.start-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--r-panel);
+  border: 1px solid var(--r-line);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px rgba(255, 255, 255, 0.06);
+  text-align: left;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.start-feature:hover { transform: translateY(-3px); border-color: rgba(166, 255, 94, 0.4); }
+.start-feature .sf-emoji { font-size: 26px; filter: drop-shadow(0 0 10px rgba(255, 213, 74, 0.4)); }
+.start-feature b { display: block; font-size: 13px; letter-spacing: 0.04em; }
+.start-feature small { color: var(--r-muted); font-size: 11px; }
+
+.start-enter-btn {
+  font-family: var(--font-display), "Bungee", system-ui, sans-serif;
+  font-size: clamp(17px, 2.6vw, 22px);
+  letter-spacing: 0.06em;
+  color: #06130a;
+  padding: 18px 52px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  background: linear-gradient(100deg, #a6ff5e, #46e6ff);
+  box-shadow: 0 0 40px rgba(166, 255, 94, 0.45), 0 14px 40px rgba(0, 0, 0, 0.45), inset 0 2px rgba(255, 255, 255, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  animation: enterPulse 2.2s ease-in-out infinite;
+}
+@keyframes enterPulse {
+  0%, 100% { box-shadow: 0 0 32px rgba(166, 255, 94, 0.4), 0 14px 40px rgba(0,0,0,0.45), inset 0 2px rgba(255,255,255,0.5); }
+  50% { box-shadow: 0 0 60px rgba(70, 230, 255, 0.6), 0 14px 40px rgba(0,0,0,0.45), inset 0 2px rgba(255,255,255,0.5); }
+}
+.start-enter-btn:hover { transform: translateY(-2px) scale(1.03); filter: brightness(1.06); }
+.start-enter-btn:active { transform: translateY(1px) scale(0.98); }
+
+.start-how-btn {
+  display: block;
+  margin: 16px auto 0;
+  background: none;
+  border: none;
+  color: var(--r-muted);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: color 0.2s ease;
+}
+.start-how-btn:hover { color: var(--r-cyan); }
+
+.start-domain {
+  margin-top: 26px;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--r-muted);
+  padding: 8px 18px 8px 22px;
+  border: 1px solid var(--r-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Canvas: pointer drag = look around (no touch scrolling) */
+.arena-root-viewport .arena-game-canvas {
+  touch-action: none;
+  cursor: grab;
+}
+.arena-root-viewport .arena-game-canvas:active { cursor: grabbing; }
+
+/* ============================================================
+   HUD RESTYLE
+   ============================================================ */
+
+/* Top-left brand */
+.arena-root-viewport .arena-top-left h1 {
+  font-family: var(--font-display), "Bungee", system-ui, sans-serif !important;
+  font-size: 30px !important;
+  letter-spacing: 0.02em !important;
+  background: linear-gradient(100deg, #a6ff5e, #46e6ff) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  filter: drop-shadow(0 0 18px rgba(70, 230, 255, 0.35)) !important;
+}
+.arena-root-viewport .arena-top-left .arena-subtitle {
+  font-size: 10px !important;
+  letter-spacing: 0.34em !important;
+  color: var(--r-muted) !important;
+  font-weight: 700 !important;
+  margin-top: 2px !important;
+}
+
+/* Glass cards */
+.arena-root-viewport .arena-glass-card {
+  background: var(--r-panel) !important;
+  border: 1px solid var(--r-line) !important;
+  border-radius: var(--r-radius) !important;
+  backdrop-filter: blur(18px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.3) !important;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), inset 0 1px rgba(255, 255, 255, 0.07) !important;
+  overflow: hidden;
+  position: relative;
+}
+.arena-root-viewport .arena-glass-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 12%; right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(166, 255, 94, 0.55), transparent);
+  pointer-events: none;
+}
+.arena-root-viewport .live-pill {
+  background: rgba(166, 255, 94, 0.1) !important;
+  border: 1px solid rgba(166, 255, 94, 0.3) !important;
+  color: var(--r-neon) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.14em !important;
+}
+.arena-root-viewport .live-pill .live-dot {
+  background: var(--r-neon) !important;
+  box-shadow: 0 0 8px var(--r-neon) !important;
+}
+
+/* Quest card */
+.arena-root-viewport .quest-card { cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease !important; }
+.arena-root-viewport .quest-card:hover { transform: translateY(-2px); border-color: rgba(166, 255, 94, 0.45) !important; }
+.arena-root-viewport .quest-card h4 {
+  font-family: var(--font-display), "Bungee", sans-serif !important;
+  font-size: 15px !important;
+  letter-spacing: 0.03em !important;
+}
+.arena-root-viewport .quest-progress-track {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+}
+.arena-root-viewport .quest-progress-bar {
+  background: linear-gradient(90deg, #a6ff5e, #46e6ff) !important;
+  box-shadow: 0 0 12px rgba(166, 255, 94, 0.6) !important;
+  border-radius: 999px !important;
+}
+.arena-root-viewport .quest-xp-reward {
+  color: var(--r-gold) !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 12px rgba(255, 213, 74, 0.5) !important;
+}
+
+/* Season card */
+.arena-root-viewport .season-card {
+  cursor: pointer;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.22), rgba(255, 45, 120, 0.14)), var(--r-panel) !important;
+  transition: transform 0.2s ease !important;
+}
+.arena-root-viewport .season-card:hover { transform: translateY(-2px); }
+.arena-root-viewport .season-headline {
+  font-family: var(--font-display), "Bungee", sans-serif !important;
+  background: linear-gradient(100deg, #ffd54a, #ff2d78) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  filter: drop-shadow(0 0 14px rgba(255, 45, 120, 0.4)) !important;
+}
+
+/* Left sidebar */
+.arena-root-viewport .arena-left-sidebar {
+  background: var(--r-panel) !important;
+  border: 1px solid var(--r-line) !important;
+  border-radius: 20px !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45) !important;
+  padding: 10px !important;
+}
+.arena-root-viewport .sidebar-nav-item {
+  border-radius: 14px !important;
+  transition: all 0.18s ease !important;
+  border: 1px solid transparent !important;
+}
+.arena-root-viewport .sidebar-nav-item:hover { background: rgba(255, 255, 255, 0.05) !important; transform: translateX(2px); }
+.arena-root-viewport .sidebar-nav-item.active {
+  background: linear-gradient(135deg, rgba(166, 255, 94, 0.16), rgba(70, 230, 255, 0.08)) !important;
+  border-color: rgba(166, 255, 94, 0.35) !important;
+  box-shadow: var(--r-glow-neon), inset 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+.arena-root-viewport .sidebar-nav-item.active .nav-icon { color: var(--r-neon) !important; filter: drop-shadow(0 0 6px rgba(166,255,94,0.6)); }
+.arena-root-viewport .sidebar-nav-item.active .nav-label { color: #fff !important; }
+
+/* Top-right pills + buttons */
+.arena-root-viewport .top-wallet-pill,
+.arena-root-viewport .top-profile-pill {
+  background: var(--r-panel) !important;
+  border: 1px solid var(--r-line) !important;
+  border-radius: 999px !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  transition: transform 0.18s ease, border-color 0.18s ease !important;
+}
+.arena-root-viewport .top-wallet-pill:hover { transform: translateY(-2px); border-color: rgba(255, 213, 74, 0.5) !important; }
+.arena-root-viewport .wallet-balance { color: var(--r-gold) !important; font-weight: 800 !important; }
+.arena-root-viewport .top-icon-btn {
+  background: var(--r-panel) !important;
+  border: 1px solid var(--r-line) !important;
+  border-radius: 50% !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  transition: transform 0.18s ease, border-color 0.18s ease !important;
+}
+.arena-root-viewport .top-icon-btn:hover { transform: translateY(-2px) scale(1.05); border-color: rgba(70, 230, 255, 0.5) !important; }
+
+/* Bottom dock HUD */
+.arena-root-viewport .arena-player-hud-bar {
+  background: var(--r-panel) !important;
+  border: 1px solid var(--r-line) !important;
+  border-radius: 24px !important;
+  backdrop-filter: blur(20px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), inset 0 1px rgba(255, 255, 255, 0.07) !important;
+  padding: 12px 18px !important;
+}
+.arena-root-viewport .hud-level-tag {
+  font-family: var(--font-display), "Bungee", sans-serif !important;
+  color: var(--r-neon) !important;
+  text-shadow: 0 0 12px rgba(166, 255, 94, 0.55) !important;
+  font-size: 15px !important;
+}
+.arena-root-viewport .hud-xp-track {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+.arena-root-viewport .hud-xp-fill {
+  background: linear-gradient(90deg, #a6ff5e, #46e6ff) !important;
+  box-shadow: 0 0 14px rgba(166, 255, 94, 0.7) !important;
+}
+.arena-root-viewport .hud-stamina-track {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+}
+.arena-root-viewport .hud-stamina-fill { background: linear-gradient(90deg, #ffd54a, #ff2d78) !important; box-shadow: 0 0 10px rgba(255, 213, 74, 0.6) !important; }
+.arena-root-viewport .hud-avatar-circle {
+  border: 2px solid rgba(166, 255, 94, 0.55) !important;
+  box-shadow: var(--r-glow-neon) !important;
+}
+
+.arena-root-viewport .hud-btn {
+  border-radius: 16px !important;
+  border: 1px solid transparent !important;
+  transition: all 0.16s ease !important;
+  font-weight: 700 !important;
+}
+.arena-root-viewport .hud-btn:hover { background: rgba(255, 255, 255, 0.06) !important; transform: translateY(-2px); }
+.arena-root-viewport .hud-btn:active { transform: translateY(1px) scale(0.97); }
+.arena-root-viewport .hud-btn.active {
+  background: linear-gradient(135deg, rgba(166, 255, 94, 0.18), rgba(70, 230, 255, 0.1)) !important;
+  border-color: rgba(166, 255, 94, 0.4) !important;
+  color: #fff !important;
+  box-shadow: var(--r-glow-neon) !important;
+}
+
+/* Radar */
+.arena-root-viewport .arena-radar-minimap .radar-circle {
+  border: 1px solid rgba(166, 255, 94, 0.35) !important;
+  box-shadow: 0 0 30px rgba(166, 255, 94, 0.12), inset 0 0 40px rgba(0, 0, 0, 0.6) !important;
+  background: radial-gradient(circle, rgba(10, 20, 12, 0.9), rgba(5, 8, 12, 0.95)) !important;
+}
+.arena-root-viewport .radar-coords-pill {
+  background: var(--r-panel) !important;
+  border: 1px solid var(--r-line) !important;
+  border-radius: 999px !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* Marquee */
+.arena-root-viewport .arena-bottom-marquee {
+  background: rgba(5, 6, 14, 0.82) !important;
+  border-top: 1px solid var(--r-line) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+.arena-root-viewport .marquee-badge {
+  font-family: var(--font-display), "Bungee", sans-serif !important;
+  background: linear-gradient(100deg, #a6ff5e, #46e6ff) !important;
+  color: #06130a !important;
+  border-radius: 10px !important;
+  box-shadow: var(--r-glow-neon) !important;
+}
+
+/* Combo + wanted badges */
+.arena-root-viewport .arena-combo-badge {
+  background: linear-gradient(135deg, rgba(20, 12, 4, 0.92), rgba(40, 16, 4, 0.92)) !important;
+  border: 1px solid rgba(255, 150, 50, 0.55) !important;
+  box-shadow: 0 0 30px rgba(255, 120, 30, 0.35), inset 0 1px rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+.arena-root-viewport .arena-combo-badge .combo-text {
+  font-family: var(--font-display), "Bungee", sans-serif !important;
+}
+.arena-root-viewport .arena-wanted-badge {
+  background: linear-gradient(135deg, rgba(30, 6, 12, 0.94), rgba(50, 8, 16, 0.94)) !important;
+  border: 1px solid rgba(255, 45, 120, 0.5) !important;
+  box-shadow: 0 0 34px rgba(255, 45, 120, 0.35) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* Toasts */
+.arena-root-viewport .arena-toast-pill {
+  background: var(--r-panel) !important;
+  border: 1px solid rgba(166, 255, 94, 0.3) !important;
+  border-radius: 14px !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5), var(--r-glow-neon) !important;
+  font-weight: 600 !important;
+}
+.arena-root-viewport .arena-toast-stack { z-index: 100 !important; }
+
+/* Modals */
+.arena-root-viewport .modal-backdrop {
+  z-index: 90 !important;
+  background: rgba(2, 3, 8, 0.72) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+.arena-root-viewport .sheet-modal-card,
+.arena-root-viewport .help-modal-card,
+.arena-root-viewport .mobile-drawer-sheet {
+  background: linear-gradient(180deg, #0d1020, #070912) !important;
+  border: 1px solid var(--r-line) !important;
+  border-radius: 26px !important;
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.7), 0 0 60px rgba(139, 92, 246, 0.1) !important;
+  overflow: hidden;
+  position: relative;
+}
+.arena-root-viewport .sheet-modal-card::before,
+.arena-root-viewport .help-modal-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 15%; right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(166, 255, 94, 0.6), transparent);
+}
+.arena-root-viewport .sheet-modal-card h2,
+.arena-root-viewport .help-modal-card h2 {
+  font-family: var(--font-display), "Bungee", sans-serif !important;
+  letter-spacing: 0.02em !important;
+  font-size: 21px !important;
+}
+.arena-root-viewport .help-play-btn,
+.arena-root-viewport .trade-action-btn,
+.arena-root-viewport .drawer-guide-btn {
+  font-family: var(--font-display), "Bungee", sans-serif !important;
+  background: linear-gradient(100deg, #a6ff5e, #46e6ff) !important;
+  color: #06130a !important;
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: 0 0 30px rgba(166, 255, 94, 0.35), 0 10px 30px rgba(0,0,0,0.4) !important;
+  transition: transform 0.15s ease, filter 0.15s ease !important;
+  cursor: pointer;
+}
+.arena-root-viewport .help-play-btn:hover,
+.arena-root-viewport .trade-action-btn:hover,
+.arena-root-viewport .drawer-guide-btn:hover { transform: translateY(-2px); filter: brightness(1.07); }
+.arena-root-viewport .help-play-btn:active,
+.arena-root-viewport .trade-action-btn:active { transform: translateY(1px) scale(0.98); }
+
+.arena-root-viewport .district-teleport-card {
+  background: var(--r-panel) !important;
+  border: 1px solid var(--r-line) !important;
+  border-radius: 18px !important;
+  transition: transform 0.18s ease, border-color 0.18s ease !important;
+}
+.arena-root-viewport .district-teleport-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(70, 230, 255, 0.5) !important;
+  box-shadow: var(--r-glow-cyan) !important;
+}
+.arena-root-viewport .leader-item-row {
+  border-radius: 16px !important;
+  border: 1px solid transparent !important;
+  transition: all 0.16s ease !important;
+}
+.arena-root-viewport .leader-item-row:hover {
+  background: rgba(166, 255, 94, 0.06) !important;
+  border-color: rgba(166, 255, 94, 0.25) !important;
+  transform: translateX(3px);
+}
+.arena-root-viewport .rank-badge {
+  font-family: var(--font-display), "Bungee", sans-serif !important;
+  color: var(--r-gold) !important;
+  text-shadow: 0 0 10px rgba(255, 213, 74, 0.5) !important;
+}
+
+/* Trader profile modal */
+.arena-root-viewport .profile-card .profit-huge {
+  font-family: var(--font-display), "Bungee", sans-serif !important;
+  background: linear-gradient(100deg, #a6ff5e, #46e6ff) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  filter: drop-shadow(0 0 16px rgba(166, 255, 94, 0.35)) !important;
+}
+.arena-root-viewport .action-btn.follow {
+  font-family: var(--font-display), "Bungee", sans-serif !important;
+  border-radius: 14px !important;
+}
+
+/* Level-up overlay */
+.arena-root-viewport .arena-levelup-overlay { z-index: 95 !important; }
+.arena-root-viewport .levelup-kicker {
+  letter-spacing: 0.4em !important;
+  color: var(--r-neon) !important;
+}
+.arena-root-viewport .levelup-number {
+  font-family: var(--font-display), "Bungee", sans-serif !important;
+  background: linear-gradient(100deg, #ffd54a, #ff2d78) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  filter: drop-shadow(0 0 30px rgba(255, 213, 74, 0.5)) !important;
+}
+
+/* HUD toggle + collapse buttons */
+.arena-root-viewport .arena-hud-toggle,
+.arena-root-viewport .arena-right-collapse-btn {
+  background: var(--r-panel) !important;
+  border: 1px solid var(--r-line) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Mobile drawer */
+.arena-root-viewport .drawer-nav-card {
+  background: var(--r-panel) !important;
+  border: 1px solid var(--r-line) !important;
+  border-radius: 16px !important;
+}
+.arena-root-viewport .drawer-wallet-card {
+  background: linear-gradient(135deg, rgba(166, 255, 94, 0.1), rgba(70, 230, 255, 0.06)), var(--r-panel) !important;
+  border: 1px solid rgba(166, 255, 94, 0.25) !important;
+  border-radius: 18px !important;
+}
+
+/* Events list */
+.arena-root-viewport .event-item-row {
+  border-radius: 12px !important;
+  transition: background 0.15s ease !important;
+}
+.arena-root-viewport .event-item-row:hover { background: rgba(255, 255, 255, 0.045) !important; }
+
+/* Scrollbars */
+.arena-root-viewport ::-webkit-scrollbar { width: 8px; height: 8px; }
+.arena-root-viewport ::-webkit-scrollbar-track { background: transparent; }
+.arena-root-viewport ::-webkit-scrollbar-thumb {
+  background: rgba(166, 255, 94, 0.25);
+  border-radius: 999px;
+}
+.arena-root-viewport ::-webkit-scrollbar-thumb:hover { background: rgba(166, 255, 94, 0.45); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 640px) {
+  .start-features { gap: 8px; }
+  .start-feature { padding: 10px 12px; }
+  .start-feature small { display: none; }
+  .start-enter-btn { padding: 16px 40px; width: 100%; max-width: 340px; }
+  .arena-root-viewport .arena-top-left h1 { font-size: 22px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arena-start-screen *, .arena-start-screen { animation: none !important; }
+}
