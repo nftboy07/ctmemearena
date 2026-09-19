@@ -1,0 +1,259 @@
+
+/* ============================================================
+   GALLERY-INSPIRED POLISH
+   Ideas pulled from hero/button/animation galleries:
+   living gradients, shine sweeps, marquee tickers,
+   staggered entrances, spring microinteractions.
+   ============================================================ */
+
+/* ---- Living gradient title (animated background-position) ---- */
+.arena-start-screen .start-title {
+  background: linear-gradient(100deg, #a6ff5e, #46e6ff, #8b5cf6, #ff2d78, #a6ff5e) !important;
+  background-size: 220% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  animation: titleSheen 6s linear infinite, titlePulse 3.2s ease-in-out infinite !important;
+}
+@keyframes titleSheen {
+  to { background-position: 220% center; }
+}
+
+/* ---- Shine sweep on the ENTER button ---- */
+.arena-start-screen .start-enter-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.arena-start-screen .start-enter-btn::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 45%;
+  left: -60%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  transform: skewX(-18deg);
+  animation: btnShine 2.8s ease-in-out infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+@keyframes btnShine {
+  0% { left: -60%; }
+  55%, 100% { left: 130%; }
+}
+
+/* ---- Staggered feature-card entrances + hover glare ---- */
+.arena-start-screen .start-feature {
+  position: relative;
+  overflow: hidden;
+  animation: featIn 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+}
+.arena-start-screen .start-feature:nth-child(1) { animation-delay: 0.35s; }
+.arena-start-screen .start-feature:nth-child(2) { animation-delay: 0.47s; }
+.arena-start-screen .start-feature:nth-child(3) { animation-delay: 0.59s; }
+@keyframes featIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+.arena-start-screen .start-feature::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(220px 120px at var(--glare-x, 50%) var(--glare-y, 0%), rgba(166, 255, 94, 0.14), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.arena-start-screen .start-feature:hover::before { opacity: 1; }
+
+/* ---- Marquee ticker along the bottom of the start screen ---- */
+.start-marquee {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+  padding: 14px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(3, 4, 10, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  z-index: 2;
+}
+.start-marquee-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marqueeSlide 22s linear infinite;
+  will-change: transform;
+}
+.start-marquee-track span {
+  font-family: var(--font-display), "Bungee", sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.28em;
+  color: rgba(154, 161, 199, 0.85);
+}
+.start-marquee-track span:nth-child(even) { color: rgba(166, 255, 94, 0.75); }
+@keyframes marqueeSlide {
+  to { transform: translateX(-50%); }
+}
+
+/* ---- Spring toast entrances ---- */
+.arena-root-viewport .arena-toast-pill {
+  animation: toastSpring 0.45s cubic-bezier(0.2, 1.4, 0.3, 1) both !important;
+  transform-origin: bottom center;
+}
+@keyframes toastSpring {
+  from { opacity: 0; transform: translateY(24px) scale(0.85); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---- Magnetic-feel HUD buttons ---- */
+.arena-root-viewport .hud-btn {
+  transition: transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.4), background 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease !important;
+}
+.arena-root-viewport .hud-btn:hover { transform: translateY(-3px) scale(1.06) !important; }
+.arena-root-viewport .sidebar-nav-item {
+  transition: transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.4), background 0.18s ease, border-color 0.18s ease !important;
+}
+.arena-root-viewport .sidebar-nav-item:hover { transform: translateX(4px) scale(1.03) !important; }
+
+/* ---- Combo badge pop ---- */
+.arena-root-viewport .arena-combo-badge {
+  animation: comboPop 0.35s cubic-bezier(0.2, 1.5, 0.3, 1) both !important;
+}
+@keyframes comboPop {
+  from { transform: translateX(-50%) scale(0.6); opacity: 0; }
+  to { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* ---- Level-up card entrance ---- */
+.arena-root-viewport .levelup-card {
+  animation: levelCardIn 0.6s cubic-bezier(0.2, 1.3, 0.3, 1) both !important;
+}
+@keyframes levelCardIn {
+  from { opacity: 0; transform: scale(0.7) rotate(-4deg); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---- Modal card spring-in ---- */
+.arena-root-viewport .sheet-modal-card,
+.arena-root-viewport .help-modal-card {
+  animation: modalSpring 0.4s cubic-bezier(0.2, 1.25, 0.3, 1) both !important;
+}
+@keyframes modalSpring {
+  from { opacity: 0; transform: translateY(26px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---- Wanted badge urgency pulse ---- */
+.arena-root-viewport .arena-wanted-badge {
+  animation: wantedPulse 1.1s ease-in-out infinite !important;
+}
+@keyframes wantedPulse {
+  0%, 100% { box-shadow: 0 0 22px rgba(255, 45, 120, 0.28) !important; }
+  50% { box-shadow: 0 0 44px rgba(255, 45, 120, 0.55) !important; }
+}
+
+/* ---- Start screen entrance choreography ---- */
+.arena-start-screen .start-live-pill { animation: featIn 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.25) both 0.2s; }
+.arena-start-screen .start-title { animation: titleSheen 6s linear infinite, titlePulse 3.2s ease-in-out infinite, featIn 0.65s cubic-bezier(0.2, 0.9, 0.3, 1.25) both 0.28s !important; }
+.arena-start-screen .start-tagline { animation: featIn 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.25) both 0.42s; }
+.arena-start-screen .start-enter-btn { animation: enterPulse 2.2s ease-in-out infinite, featIn 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.25) both 0.7s; }
+.arena-start-screen .start-how-btn { animation: featIn 0.6s ease both 0.82s; }
+.arena-start-screen .start-domain { animation: featIn 0.6s ease both 0.9s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .start-marquee-track, .arena-start-screen .start-enter-btn::after { animation: none !important; }
+}
+
+/* ============================================================
+   WAVE 2 — 21st.dev / mobbin / shadcn inspired
+   Spotlight cards, animated gradient borders, focus rings.
+   ============================================================ */
+
+/* ---- Spotlight hover glow that follows the cursor (21st.dev style) ---- */
+.arena-root-viewport .arena-glass-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(166, 255, 94, 0.12), transparent 65%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.arena-root-viewport .arena-glass-card:hover::after { opacity: 1; }
+
+/* ---- Animated gradient border on the season card ---- */
+.arena-root-viewport .season-card {
+  border: 1px solid transparent !important;
+  background:
+    linear-gradient(rgba(11, 14, 28, 0.92), rgba(11, 14, 28, 0.92)) padding-box,
+    linear-gradient(120deg, rgba(255, 213, 74, 0.65), rgba(255, 45, 120, 0.65), rgba(139, 92, 246, 0.65), rgba(255, 213, 74, 0.65)) border-box !important;
+  background-size: auto, 300% 300% !important;
+  animation: borderFlow 5s linear infinite !important;
+}
+@keyframes borderFlow {
+  to { background-position: 0 0, 300% 0; }
+}
+
+/* ---- shadcn-style focus rings for keyboard users ---- */
+.arena-root-viewport button:focus-visible {
+  outline: 2px solid rgba(166, 255, 94, 0.75);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* ---- Quest card: progress shimmer ---- */
+.arena-root-viewport .quest-progress-bar {
+  position: relative;
+  overflow: hidden;
+}
+.arena-root-viewport .quest-progress-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
+  animation: barShimmer 2.4s ease-in-out infinite;
+}
+@keyframes barShimmer {
+  0% { transform: translateX(-100%); }
+  60%, 100% { transform: translateX(100%); }
+}
+
+/* ---- Wanted stars flicker like a police lightbar ---- */
+.arena-root-viewport .arena-wanted-badge .star.lit {
+  animation: starFlicker 0.9s steps(2, jump-none) infinite;
+}
+.arena-root-viewport .arena-wanted-badge .star.lit:nth-child(2n) { animation-delay: 0.45s; }
+@keyframes starFlicker {
+  50% { opacity: 0.45; }
+}
+
+/* ---- Start button: press-and-hold feel ---- */
+.arena-start-screen .start-enter-btn {
+  transition: transform 0.12s ease, filter 0.15s ease !important;
+}
+.arena-start-screen .start-enter-btn:active {
+  transform: scale(0.95) !important;
+  filter: brightness(0.92);
+}
+
+/* ---- Mobile drawer handle (mobbin-style bottom sheet cue) ---- */
+.arena-root-viewport .mobile-drawer-sheet::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arena-root-viewport .season-card { animation: none !important; }
+  .arena-root-viewport .quest-progress-bar::after { animation: none !important; }
+}
